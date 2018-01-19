@@ -1,0 +1,340 @@
+---
+title: "MnA Coeff Cutoff"
+author: "Dan Zylberglejd and Noam Habot"
+date: "5/8/2017"
+output: pdf_document
+---
+```{r}
+############################################################################################################
+# This is an analysis file to determine the cutoff points between top/bottom law firms
+#     where the top/bottom is chosen according in a couple of different methods.
+#
+# Ways that top/bottom law firms are decided:
+#   1) (Gross Revenue) / (Number of Lawyers)
+#           - with a rolling cutoff from the top tier being the top 5 to the top tier being the top 120
+#                 as ranked by the outcome=(Gross Revenue)/(Number of Lawyers)
+#   2) Individual MnA
+#           - the cutoff being Mna>0 and MnA=0
+#
+# We use a logistic regression model to predict whether a given data point will be classified
+#       as top or bottom. The model is trained on the entire data set.
+#
+#
+# DEFINITION of "cutoff" value:
+#   A "cutoff" value is defined as the number of firms that are in the "top tier", and (n-cutoff) is the number in the bottom tier
+#
+#
+# Decisions:
+#   1) the rolling window in number of years - determines how many years to look back from 2015
+#           - i.e. if rollingWindow = 5, then data will be considered from all of 2011 to all of 2015
+#   2) which variables and plots to create at the end to show the results
+#
+# Created by Dan Zylberglejd and Noam Habot
+############################################################################################################
+```
+
+
+```{r}
+##### Clear environment
+rm(list = ls())
+
+##### Load libraries
+#detach("package:MASS", unload=TRUE)
+library(dplyr)
+library(plm)
+library(lmtest)
+library(sandwich)
+library(multiwayvcov)
+library(ggplot2)
+library(data.table)
+
+
+##### Load dataframe
+setwd("~/Google Drive/Stanford Law Project")
+load('Data/EliteLawDf.RData')
+```
+
+We here write a function that will take in a the accuracy data frame from a specific run and find the cutoff range.  
+We define a "cutoff range" as the range of 5 points that we can consider to be the cutoff.  
+We will assign the "cutoff" to be the middle number in this range.
+```{r}
+# perform a sliding range analysis from cutoff=5 onwards, and see where is the first 5-point range that we see a significant difference
+# continue this sliding range for a length of about 10 more points and see that we do have a max; otherwise, assign the cutoff to the new range
+
+
+findCutoffRange <- function(accuracy, maxInThisDataSet, beginningOfCutoff) {
+  range <- beginningOfCutoff:(beginningOfCutoff+4)
+  cutoffRange <- range
+  largestDiff <- 0
+  i <- 9
+  while (i <= maxInThisDataSet-5) {
+    thisDiff <- max(accuracy[range])-min(accuracy[range])
+    #print(paste("i=", i, "thisDiff=", thisDiff, "range=", range))
+    if (thisDiff > largestDiff) {
+      largestDiff <- thisDiff
+      cutoffRange <- range
+    }
+    range <- range + 1
+    i <- i + 1
+  }
+  return(cutoffRange)
+}
+
+
+# this is a function that can only be run after "wholeResults" has been created.
+# it plots the accuracies and cutoffs for the data in that row
+plotRowI <- function(rowToVisualize) {
+  ggd <- data.frame(accuracy=wholeResults$Accuracies[rowToVisualize][[1]], x=1:length(wholeResults$Accuracies[rowToVisualize][[1]]))
+  oc <- wholeResults$OptimalCutoff[rowToVisualize]
+  
+  title <- "Accuracy vs. Cutoff"
+  if (wholeResults$Firm[rowToVisualize] == "All")  {
+    title <- paste(title, "- All Firms")
+  }
+  if (wholeResults$YearFrom[rowToVisualize] == wholeResults$YearTo[rowToVisualize]) {
+    title <- paste(title, "in", wholeResults$YearTo[rowToVisualize])
+  } else {
+    title <- paste(title, "from", wholeResults$YearFrom[rowToVisualize], "to", wholeResults$YearTo[rowToVisualize])
+  }
+  
+  p <- ggplot(data=ggd, aes(x=x, y=accuracy)) +
+      geom_line(color="red") +
+      geom_point() + ggtitle(title) + xlab("Cutoff") + ylab("Accuracy (%)") +
+      geom_vline(xintercept=oc, linetype="dotted") + 
+      geom_text(aes(x=oc, label=paste("Cutoff =",oc), y=quantile(ggd$accuracy, na.rm=TRUE, 0.1)), colour="black", angle=90, text=element_text(size=11)) +
+      labs(caption = "Note: the Cutoff value represents the number of firms that are in the Top Tier")# +
+      #geom_text(data=subset(results, name>=(oc-2) & name <= (oc+2)), aes(x=(oc-2):(oc+2), accuracy,label=name))
+  
+  # plot the individual MnA as a proportion of its highest MnA
+  #if (wholeResults[rowToVisualize, "Firm"] != "All") {
+  #  p + ggplo
+  #}
+  show(p)
+}
+
+
+localMaxima <- function(x) {
+  # Use -Inf instead if x is numeric (non-integer)
+  numNAs <- sum(is.na(x))
+  x <- na.omit(x)
+  y <- diff(c(-.Machine$integer.max, x)) > 0L
+  rle(y)$lengths
+  y <- cumsum(rle(y)$lengths)
+  y <- y[seq.int(1L, length(y), 2L)]
+  if (x[[1]] == x[[2]]) {
+    y <- y[-1]
+  }
+  y <- y + numNAs
+  return(y)
+}
+maximums <- function(x) which(x - shift(x, 1) > 0  & x - shift(x, 1, type='lead') > 0)
+minimums <- function(x) which(x - shift(x, 1) < 0  & x - shift(x, 1, type='lead') < 0)
+```
+
+Here we use a dependent variable $Outcome=\frac{GrossRevenue}{Lawyers}$ as the outcome variable in the model, with the cutoff ranging from the top 5 to the top 120 firms (as ranked by the outcome variable).
+```{r}
+beginningOfCutoff <- 5
+shouldSave <- FALSE
+
+# deletes an existing and creates a new wholeResults table
+wholeResults <- data.frame(Firm=character(0), YearFrom=numeric(0), YearTo=numeric(0),
+                           NumYears=numeric(0), OptimalCutoff=numeric(0), NumInSample=numeric(0), OptimalCutoffDividedByNumInSample=numeric(0),
+                           AvgAccBefore=numeric(0), AvgAccAfter=numeric(0), DropInAcc=numeric(0), tValue=numeric(0), pValue=numeric(0), 
+                           Accuracies=numeric(0), stringsAsFactors=FALSE)
+
+# Various data queries
+#wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("Baker & Hostetler", 1984, 2015)
+#wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("Akin, Gump, Strauss, Hauer & Feld", 1984, 2015)
+#wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("All", 2014, 2015)
+#wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("All", 2013, 2015)
+#wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("All", 2012, 2015)
+#wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("All", 2001, 2004)
+#wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("Baker & Hostetler", 1984, 2015)
+
+# gets the cutoff values for all the firms for each year
+for (y in unique(df$Year)) {
+  wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("All", y, y)
+}
+#wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("All", 1995, 1995)
+
+
+# Set the output
+Output = df$GrossRev/df$Lawyers
+# Set the main covariates
+covariates = df %>% select(FirmName, Year, Lawyers, Lawyers2, MnA, Equity, IPO, Leverage)
+
+# Get factor variables Year and Firm
+#years = data.frame(Years = as.factor(df$Year - min(df$Year) + 1))
+#firms = data.frame(FirmID = as.character(df$FirmID))
+
+# Merge into one main dataset
+dataset = cbind(Output, covariates)
+dataset = dataset %>% na.omit()
+
+for (i in 1:nrow(wholeResults)) {
+  print(paste("Working on row:", i, "out of", nrow(wholeResults)))
+  
+  ##### Initialization variables
+  # YearFrom, YearTo
+  yearFrom <- wholeResults[i, "YearFrom"]
+  yearTo <- wholeResults[i, "YearTo"]
+  wholeResults[i, "NumYears"] <- yearTo-yearFrom+1
+  
+  
+  # Dataframes for results
+  #results = data.frame(AdjR2=numeric(0), AIC=numeric(0), BIC=numeric(0), CV=numeric(0), MnATop=numeric(0), MnABottom=numeric(0))
+  results = data.frame(accuracy=numeric(0), numPredictedPositive=numeric(0), numConsidered=numeric(0),
+                       tValue=numeric(0), pValue=numeric(0))
+  
+  currDataset = dataset %>% filter(Year >= yearFrom) %>% filter(Year <= yearTo)
+  
+  if (wholeResults[i, "Firm"] != "All") {
+    currDataset = currDataset %>% filter(FirmName == wholeResults[i, "Firm"])
+  }
+  
+  wholeResults[i, "NumInSample"] <- nrow(currDataset)
+  
+  for(cutoff in beginningOfCutoff:nrow(currDataset)){
+    # Tracking
+    #print(paste("Running for cutoff at firm with rank", toString(cutoff)))
+    
+    # Set the M&A variables according to the cutoff
+    #currDataset = dataset %>% filter(Year <= 2015) %>% filter(Year >= 2015 - rollingWindow + 1)# %>% select(-Year, -FirmName)
+    
+    #### why this cutoff?
+    #outputCutoff = sort(currDataset$Output,partial=nrow(currDataset)-1)[nrow(currDataset)-cutoff+1] 
+    outputCutoff = sort(currDataset$Output, decreasing=TRUE)[cutoff] 
+    
+    # Create the 2 groups
+    currDataset = currDataset %>% mutate(isTop = Output>=outputCutoff)
+  
+    # Run model
+    model = glm(isTop ~ ., data = currDataset[,-2])
+    
+    # Extract results
+    coeffs = summary(model)$coefficients[, 1]
+    predictions = predict(model, newdata=currDataset[,-2], type="response")
+    predictions = predictions > 0.5
+    accuracy = sum(predictions==currDataset$isTop) / nrow(currDataset)
+    #which(predictions)
+    
+  
+    
+    # Populate results table
+    results[cutoff, "accuracy"] =  accuracy 
+    results[cutoff, "numPredictedPositive"] = sum(predictions)
+    results[cutoff, "numConsidered"] = nrow(currDataset)
+  }
+  results["name"] = 1:nrow(currDataset)
+  
+  startLookingForCutoffAtIndex <- beginningOfCutoff+ceiling(nrow(currDataset)*0.075)
+  
+  # FINDING THE OPTIMAL CUTOFF POINT
+  # loop again over all the results to incorporate t-tests for all the cutoff points
+  
+  #for (cutoff in startLookingForCutoffAtIndex:(nrow(currDataset)-7)) {
+  #for (cutoff in localMaxima(results$accuracy)) {
+  for (cutoff in c(maximums(results$accuracy), minimums(results$accuracy))) {
+    if (cutoff < startLookingForCutoffAtIndex || cutoff > (nrow(currDataset)-7)) {
+      next;
+    }
+    WelchTtest <- t.test(results$accuracy[beginningOfCutoff:(cutoff-1)], results$accuracy[(cutoff+1):length(results$accuracy)])
+    results[cutoff, "tValue"] <- WelchTtest$statistic
+    results[cutoff, "pValue"] <- WelchTtest$p.value
+  }
+  optimalCutoff <- which.min(results$pValue)
+  cutoffRange <- (optimalCutoff-2):(optimalCutoff+2)
+  
+  
+  #cutoffRange <- findCutoffRange(results$accuracy, nrow(currDataset), beginningOfCutoff)
+  #optimalCutoff <- median(cutoffRange)
+  
+  
+  
+  wholeResults[i, "OptimalCutoff"] <- optimalCutoff
+  wholeResults[i, "OptimalCutoffDividedByNumInSample"] <- optimalCutoff/nrow(currDataset)
+  
+
+  
+  # use Welch's t-test to compute the significance
+  #avgAccBefore <- mean(results$accuracy[beginningOfCutoff:(cutoffRange[1]-1)])
+  #avgAccAfter <- mean(results$accuracy[(cutoffRange[length(cutoffRange)]+1):length(results$accuracy)])
+  
+  #WelchTtest <- t.test(results$accuracy[beginningOfCutoff:(cutoffRange[1]-1)],
+                       #results$accuracy[(cutoffRange[length(cutoffRange)]+1):length(results$accuracy)])
+  
+  WelchTtest <- t.test(results$accuracy[beginningOfCutoff:(optimalCutoff-1)], results$accuracy[(optimalCutoff+1):length(results$accuracy)])
+  
+  wholeResults[i, "AvgAccBefore"] <- WelchTtest$estimate[1]
+  wholeResults[i, "AvgAccAfter"] <- WelchTtest$estimate[2]
+  wholeResults[i, "DropInAcc"] <- WelchTtest$estimate[1] - WelchTtest$estimate[2]
+  wholeResults[i, "tValue"] <- WelchTtest$statistic
+  wholeResults[i, "pValue"] <- WelchTtest$p.value
+  wholeResults[i, "Accuracies"][[1]] <- list(results$accuracy)
+  
+  
+
+}
+plotRowI(23)
+#ggplot(data=results, aes(x=1:120, y=numPredicted)) +
+#  geom_line(color="blue")+
+#  geom_point() + ggtitle("Number Predicted to be in Top vs. Cutoff") + xlab("Cutoff") + ylab("Number Predicted to be in Top") +
+#  geom_text(data=subset(results, name>=31 & name <= 38), aes(x=31:38, numPredicted,label=name))
+```
+
+To visualize row i of the $wholeResults$ data set, we do:
+```{r, eval=FALSE}
+for (i in 1:nrow(wholeResults)) {
+  plotRowI(i)
+}
+```
+
+To save the wholeResults table:
+```{r, eval=FALSE}
+if (shouldSave) {
+  save(wholeResults, file = 'Data/YearlyCutoffAccuracies.RData')
+}
+```
+
+Here we use the independent variable *Individual MnA* as the output, with the cutoff being firms with $MnA>0$ and those with $MnA=0$.
+```{r}
+##### Initialization variables
+# Rolling window, in number of years
+
+results = data.frame(accuracy=numeric(0), numPredicted=numeric(0), MnACoeff=numeric(0))
+
+for (rollingWindow in 1:20) {
+  # Set the main covariates
+  dataset = df %>% select(MnA, FirmName, Year, Lawyers, Lawyers2, Equity, IPO, Leverage, GrossRev)
+  
+  # Merge into one main dataset
+  dataset = dataset %>% na.omit() %>% filter(Year <= 2015) %>% filter(Year >= 2015 - rollingWindow + 1)
+  
+  
+  # Create the 2 groups
+  #currDataset = currDataset %>% mutate(isTop = Output>=outputCutoff) 
+  dataset = dataset %>% mutate(isTop = MnA>0)
+  
+  # Run model
+  model = glm(isTop ~ ., data = dataset[,-2]) # remove the firm name from model
+  
+  # Extract results
+  coeffs = summary(model)$coefficients[, 1]
+  predictions = predict(model, newdata=dataset[,-2], type="response") # remove the firm name from model
+  predictions = predictions > 0.5
+  accuracy = sum(predictions==dataset$isTop) / nrow(dataset)
+  numPredicted = sum(predictions)
+  
+  
+
+  # Populate results table
+  results <-rbind(results, data.frame("accuracy"=accuracy, "numPredicted"=sum(predictions), "MnACoeff"=coeffs["MnA"]))
+}
+
+rownames(results) <- 1:nrow(results)
+ggplot(data=results, aes(x=1:nrow(results), y=accuracy)) + geom_line() +  geom_point(color="red") +
+  ggtitle("Accuracy of Top = (Mna > 0) relative to Rolling Window") + ylab("Accuracy (%)") + xlab("Rolling Window (Years)")
+
+
+results
+```

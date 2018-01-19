@@ -1,0 +1,500 @@
+---
+title: "MnA Coeff Cutoff"
+author: "Dan Zylberglejd and Noam Habot"
+date: "5/8/2017"
+output: pdf_document
+---
+```{r}
+############################################################################################################
+# This is an analysis file to determine the cutoff points between top/bottom law firms
+#     where the top/bottom is chosen according in a couple of different methods.
+#
+# Ways that top/bottom law firms are decided:
+#   1) (Gross Revenue) / (Number of Lawyers)
+#           - with a rolling cutoff from the top tier being the top 5 to the top tier being the top 120
+#                 as ranked by the outcome=(Gross Revenue)/(Number of Lawyers)
+#   2) Individual MnA
+#           - the cutoff being Mna>0 and MnA=0
+#
+# We use a logistic regression model to predict whether a given data point will be classified
+#       as top or bottom. The model is trained on the entire data set.
+#
+#
+# DEFINITION of "cutoff" value:
+#   A "cutoff" value is defined as the number of firms that are in the "top tier", and (n-cutoff) is the number in the bottom tier
+#
+#
+# Decisions:
+#   1) the rolling window in number of years - determines how many years to look back from 2015
+#           - i.e. if rollingWindow = 5, then data will be considered from all of 2011 to all of 2015
+#   2) which variables and plots to create at the end to show the results
+#
+# Created by Noam Habot
+############################################################################################################
+```
+
+
+```{r}
+##### Clear environment
+rm(list = ls())
+
+##### Load libraries
+#detach("package:MASS", unload=TRUE)
+library(dplyr)
+library(ggplot2)
+library(data.table)
+require(strucchange)
+library(gridExtra)
+library(glmnet)
+library(lm.beta)
+
+
+##### Load dataframe
+setwd("~/Google Drive/Stanford Law Project")
+load('Data/EliteLawDf2016.RData')
+```
+
+
+Here we use a dependent variable $Outcome=\frac{GrossRevenue}{Lawyers}$ as the outcome variable in the model, with the cutoff ranging from the top 5 to the top 120 firms (as ranked by the outcome variable).
+```{r}
+source("Analysis/PlottingFunctions.R")
+
+# a boolean indicating whether or not we should save the plot
+shouldSave <- FALSE
+
+# from 1 to 5 is supported
+numTiers <- 2
+
+
+
+# the model from which we want to extract the coefficients
+# choice of:
+# lm, ridge, lasso
+method <- "lasso"
+
+# set the output
+#Output = df$GrossRev/df$Lawyers
+#outputText <- "GrossRevenuePerLawyer"
+Output = df$NOI.eqPart
+outputText <- "NOIPerEquityPartner"
+
+# deletes an existing and creates a new wholeResults table
+wholeResults <- data.frame(Firm=character(0), YearFrom=numeric(0), YearTo=numeric(0),
+                           NumYears=numeric(0), Breakpoints=numeric(0), NumInSample=numeric(0),
+                           tier1Coeff=numeric(0), tier2Coeff=numeric(0), tier3Coeff=numeric(0),
+                           tier4Coeff=numeric(0), tier5Coeff=numeric(0), AllFirmsMnAPval=numeric(0),
+                           stringsAsFactors=FALSE)
+
+
+# we have data from 1984 to 2015
+# gets the cutoff values for all the firms for each year
+#for (y in unique(df$Year)) {
+#  wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("All", y, y)
+#}
+#wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("All", 2015, 2015)
+#wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("Baker & Hostetler", 1984, 2015)
+
+for (y in 1988:2016) {
+  wholeResults[nrow(wholeResults) + 1, c("Firm", "YearFrom", "YearTo")] <- list("All", y, y)
+}
+
+
+
+
+
+fakeTable <- data.frame()
+
+getCoeff <- function(dfForCoeff, forFakeTable) {
+  alpha <- 0
+  if (method == "lm") {
+    #return(lm(model$terms, data=dfForCoeff)$coefficients["MnA"])
+    return(coef(lm.beta(lm(model$terms, data=dfForCoeff)))["MnARevenue"])
+  } else if (method == "lasso") {
+    alpha <- 1
+  }
+  y <- dfForCoeff$Output
+  x <- dfForCoeff %>% select(Lawyers, Lawyers2, MnARevenue, EquityRevenue, IPORevenue, Leverage) %>% data.matrix()
+
+  # alpha=0 means RIDGE
+  # alpha=1 means LASSO
+  fit <- cv.glmnet(x, y, alpha = alpha)
+  deviance <- fit$glmnet.fit$dev.ratio[which(fit$glmnet.fit$lambda == fit$lambda.min)]
+  
+  
+  if (forFakeTable) {
+    
+    #fakeTable <- rbind(fakeTable, coef(fit, s = "lambda.min")[,1])
+    #colnames(fakeTable) <- names(coef(fit, s = "lambda.min")[,1])
+    
+    fakeTable <- rbind(fakeTable, deviance)
+    
+    return(fakeTable)
+  } else {
+    return(coef(fit, s = "lambda.min")["MnARevenue",1])
+  }
+  
+  
+}
+
+
+
+# Set the main covariates
+covariates = df %>% select(FirmName, Year, Lawyers, Lawyers2, MnARevenue, EquityRevenue, IPORevenue, Leverage)
+
+# Get factor variables Year and Firm
+#years = data.frame(Years = as.factor(df$Year - min(df$Year) + 1))
+#firms = data.frame(FirmID = as.character(df$FirmID))
+
+# Merge into one main dataset
+#dataset = cbind(Output, covariates)
+dataset = cbind(Output, df)
+dataset = dataset %>% na.omit()
+
+r2Vec <- c()
+for (i in 1:nrow(wholeResults)) {
+  print(paste("Working on row:", i, "out of", nrow(wholeResults)))
+  
+  ##### Initialization variables
+  # YearFrom, YearTo
+  yearFrom <- wholeResults[i, "YearFrom"]
+  yearTo <- wholeResults[i, "YearTo"]
+  
+  
+  
+  
+  # Get the current dataset ready
+  currDataset = dataset %>% filter(Year >= yearFrom) %>% filter(Year <= yearTo)
+  if (wholeResults[i, "Firm"] != "All") {
+    currDataset = currDataset %>% filter(FirmName == wholeResults[i, "Firm"])
+  }
+  # Sort data frame by decreasing Output variable
+  currDataset <- currDataset[order(currDataset$Output, decreasing=TRUE),]
+  
+  
+  # eliminate 3 and 6 => the firm names and the revenue
+  dfForRegression <- currDataset[,!(names(currDataset) %in% c("FirmName","FirmID","GrossRev", "Rank", "AggMnA", "AggEquity", "AggIPO"))]
+  
+  
+  
+  model <- lm(Output ~ Lawyers + Lawyers2 + MnARevenue + EquityRevenue + IPORevenue + Leverage, data=dfForRegression)
+  r2Vec <- c(r2Vec, summary(model)$r.squared)
+  
+
+  if (numTiers == 1) {
+    wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression, FALSE)
+  } else if (numTiers > 1) {
+    b <- breakpoints(model$terms, data=dfForRegression, breaks=(numTiers-1))
+    firstBreakpoint <- b$breakpoints[1]
+    lastRow <- nrow(dfForRegression)
+    
+    wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression[1:b$breakpoints[1], ], FALSE)
+    if (numTiers == 2 || is.na(b$breakpoints[2])) {
+      wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[1]+1):lastRow, ], FALSE)
+    } else {
+      wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[1]+1):b$breakpoints[2], ], FALSE)
+      if (numTiers == 3 || is.na(b$breakpoints[3])) {
+        wholeResults[i, "tier3Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[2]+1):lastRow, ], FALSE)
+      } else {
+        wholeResults[i, "tier3Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[2]+1):b$breakpoints[3], ], FALSE)
+        if (numTiers == 4 || is.na(b$breakpoints[4])) {
+          wholeResults[i, "tier4Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[3]+1):lastRow, ], FALSE)
+        } else {
+          wholeResults[i, "tier4Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[3]+1):b$breakpoints[4], ], FALSE)
+          wholeResults[i, "tier5Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[4]+1):lastRow, ], FALSE)
+        }
+      }
+    }
+  }
+
+  
+  #wholeResults[i, "AllFirmsMnAPval"] <- summary(lm(model$terms, data=dfForRegression))$coefficients["MnARevenue", 4]
+  fakeTable <- getCoeff(dfForRegression, TRUE)
+  
+  
+  wholeResults[i, "NumYears"] <- yearTo-yearFrom+1
+  wholeResults[i, "NumInSample"] <- nrow(currDataset)
+  wholeResults[i, "Breakpoints"][[1]] <- list(b$breakpoints)
+  wholeResults[i, "Outcome"][[1]] <- list(currDataset$Output)
+
+  p <- ggplot(data=currDataset, aes(x=1:nrow(currDataset), y=Output)) + geom_line(aes(color="red"), size=1.5) + geom_point(size=0.5) +
+    ggtitle(paste("Revenue/Lawyer with Breakpoints in", yearFrom)) + theme(legend.position="none") + xlab("Rank Of Firm") + ylab("Revenue/Lawyer") +
+    geom_vline(xintercept=b$breakpoints, linetype="dotted") + 
+    geom_text(data=currDataset[b$breakpoints,], aes(x=b$breakpoints, y=rep(2*(max(currDataset$Output)-min(currDataset$Output))/3, length(b$breakpoints)),label=b$breakpoints), colour="black", angle=90)
+  #show(p)
+}
+
+p <- plotOverYears(wholeResults, numTiers, method, outputText)
+
+name <- paste(wholeResults$YearFrom[1], wholeResults$YearFrom[nrow(wholeResults)], method, outputText, numTiers, sep="-")
+fileName <- paste("Generate Latex/IndivTexOutput/methods-", name, ".jpg", sep="")
+ggsave(file=fileName, p, width=12, height=7.5, dpi=300)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# make a plot to show the breakpoints per year
+year <- numeric()
+breakpoints <- numeric()
+shape <- numeric()
+for (i in 1:nrow(wholeResults)) {
+  for (j in 1:length(wholeResults[i,]$Breakpoints[[1]])) {
+    year <- c(year, wholeResults[i,"YearFrom"])
+    breakpoints <- c(breakpoints, wholeResults[i,]$Breakpoints[[1]][j])
+    shape <- c(shape, ".")
+  }
+  year <- c(year, wholeResults[i,"YearFrom"])
+  breakpoints <- c(breakpoints, wholeResults[i,]$NumInSample)
+  shape <- c(shape, "*")
+}
+breakdf <- data.frame(year, breakpoints, shape)
+ggplot(data=breakdf, aes(x=factor(year), breakpoints)) + geom_point(aes(color=breakpoints, shape=shape)) +
+    scale_color_gradient(name="Scale", low="lightblue", high="black") +
+    ggtitle("Breakpoints Throughout the Years") + xlab("Year") + ylab("Breakpoint at Rank of Revenue/Lawyer") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1), panel.grid.major.y = element_line(color="white", size=1.5), panel.grid.minor.y = element_line(color="white", size=1)) +
+    labs(caption = "Rev/Lawyer ~ Lawyers + Lawyers2 + MnA + Equity + IPO + Leverage") +
+    scale_shape_discrete(name ="Point Type", labels=c("Breakpoint", "Num Of Firms")) 
+
+#ggsave("Meetings/BreakpointsThroughoutYears.jpg", plot=last_plot(), device="jpeg")
+```
+
+```{r}
+# seeing differences in between the "top" and the "bottom" as determined by the first breakpoint
+# create the bar plot that will show the differences in MnA between top tier and bottom tier, for each year
+
+## only runs well when wholeResults table was computed with numTiers == 2
+
+year <- numeric(0)
+topBottom <- factor(0)
+value <- numeric(0)
+summaryYear <- character(0)
+pvalVec <- character(0)
+firstBreakpointVec <- numeric(0)
+for (i in 1:nrow(wholeResults)) {
+  # establish the current dataset that we are working with
+  thisYear <- wholeResults[i,"YearFrom"]
+  if (wholeResults[i,"YearFrom"] != wholeResults[i,"YearTo"]) {
+    thisYear <- paste(wholeResults[i,"YearFrom"], "-", wholeResults[i,"YearTo"], sep="")
+  }
+  currDataset = dataset %>% filter(Year >= wholeResults[i,"YearFrom"]) %>% filter(Year <= wholeResults[i,"YearTo"])
+  if (wholeResults[i, "Firm"] != "All") {
+    currDataset = currDataset %>% filter(FirmName == wholeResults[i, "Firm"])
+  }
+  # Sort data frame by decreasing Output variable
+  currDataset <- currDataset[order(currDataset$Output, decreasing=TRUE),]
+  
+    
+  # compute the first breakpoints and split the data on it
+  firstBreakpoint <- wholeResults[i,]$Breakpoints[[1]][1]
+  numInSample <- wholeResults[i,"NumInSample"]
+  top <- currDataset$MnARevenue[1:firstBreakpoint]
+  bottom <- currDataset$MnARevenue[(firstBreakpoint+1):numInSample]
+  
+  # record the p-value to write on the boxplot
+  summaryYear <- c(summaryYear, thisYear)
+  pvalVec <- c(pvalVec, format(t.test(top,bottom)$p.value,digits=3))
+  firstBreakpointVec <- c(firstBreakpointVec, firstBreakpoint)
+  
+  # the variables to add to the plot data frame
+  year <- c(year, rep(thisYear, numInSample))
+  topBottom <- c(topBottom,  rep("Bottom Tier", length(bottom)), rep("Top Tier", length(top)))
+  value <- c(value, bottom, top)
+}
+topBottom <- topBottom[-1]
+topBottom <- as.factor(topBottom)
+topBottom <- factor(topBottom,levels = rev(levels(topBottom)),ordered = TRUE)
+
+dfBoxPlot <- data.frame(year=year, value=value, topBottom=topBottom)
+summaryTable <- data.frame(summaryYear, firstBreakpointVec, pvalVec)
+names(summaryTable) <- c("Year(s)", "First Breakpoint" , "P Value")
+
+
+meanDF <- data.frame(year=character(0), topBottom=character(0), value=numeric(0),stringsAsFactors=FALSE)
+for (tb in c("Top Tier", "Bottom Tier")) {
+  for (year in unique(dfBoxPlot$year)) {
+    vec <- dfBoxPlot[dfBoxPlot$year==year & dfBoxPlot$topBottom==tb,]$value
+    m <- mean(vec[vec>0])
+    meanDF[nrow(meanDF)+1,] <- c(year, tb, m)
+  }
+}
+meanDF$value <- as.numeric(meanDF$value)
+meanDF$topBottom <- as.factor(meanDF$topBottom)
+meanDF$topBottom <- relevel(meanDF$topBottom, "Top Tier")
+
+
+# Add the AggMnA values 
+yearAggMnA <- aggregate( AggMnA ~ Year, df, max )
+yearAggMnA[,3] <- rep("Agg M&A (/8)", nrow(yearAggMnA))
+names(yearAggMnA) <- c("year", "value", "topBottom")
+yearAggMnA$value <- 1000*yearAggMnA$value
+
+# get the number of rows per year in the main df that have MnARevenue > 0
+numGreaterZero <- as.numeric(unlist(df %>% select(Year, MnARevenue) %>% group_by(Year) %>% summarize(countB = n(), countBfoo = sum(MnARevenue>0)) %>% select(countBfoo)))
+yearAggMnA$value <-  yearAggMnA$value  / 8
+meanDF <- rbind(meanDF, yearAggMnA)
+
+
+
+# Add the breakpoints to the plot too
+breakpointsDF <- data.frame(wholeResults$YearFrom, unlist(wholeResults$Breakpoints))
+breakpointsDF[,3] <- rep("Breakpoints", nrow(breakpointsDF))
+names(breakpointsDF) <- c("year", "value", "topBottom")
+breakpointsDF$value <- 3000*breakpointsDF$value
+meanDF <- rbind(meanDF, breakpointsDF)
+meanDF[,"lt"] <- c(rep("a", 87), rep("g", nrow(meanDF)-87))
+
+captionText <- "\nThe Aggregated M&A variable is divided by 8 for scaling purposes. Breakpoint is the pivot point between the two tiers."
+
+
+# build the correlation matrix
+corrDF <- data.frame(TopTier=meanDF[1:29,"value"], BottomTier=meanDF[30:58,"value"], 
+                     AggMnA=meanDF[59:87,"value"], Breakpoints=meanDF[88:116,"value"])
+names(corrDF)[3] <- "AggM&A"
+#cor(corrDF)
+
+
+group.colors <- c(A = "green", B = "red", C ="purple", D = "#33B5FF")
+names(group.colors) <- unique(meanDF$topBottom)
+
+p <- ggplot(meanDF)+
+  geom_line(data=subset(meanDF, lt=='a'), aes(x=year, y=value, color=topBottom, group=topBottom, linetype='a')) +
+  geom_line(data=subset(meanDF, lt=='g'), aes(x=year, y=value, color=topBottom, group=topBottom, linetype='g')) +
+  labs(x="Year", y="M&A Revenue") +
+  theme_minimal() +
+  labs(colour = "Lines", caption=captionText)+
+  scale_linetype(guide=FALSE)+
+  ggtitle("Average M&A Revenue of Top Tier and Bottom Tier firms, per Year(s)")+
+  theme(text = element_text(size = 13), 
+        plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, hjust = -0.5)) +
+  scale_y_continuous(sec.axis = sec_axis(~./3000, name = "Breakpoint"))+
+  annotation_custom(tableGrob(cor(corrDF)), xmin = 15, xmax = 15, ymin = -170000, ymax = -170000) +
+  theme(plot.margin = unit(c(1,1,5.5,1), "cm")) + 
+  scale_color_manual(breaks=c("Top Tier","Bottom Tier","Agg M&A (/8)", "Breakpoints"), values=group.colors)
+  
+show(p)
+
+
+
+
+
+
+ggsave(file="Meetings/MnADifferences.jpg", p, width=12, height=7.5, dpi=300)
+
+
+
+
+# 
+# # Set theme to allow for plotmath expressions
+# tt <- ttheme_default(colhead=list(fg_params = list(parse=TRUE)))
+# tbl <- tableGrob(summaryTable, rows=NULL, theme=tt)
+# # Plot chart and table into one object
+# toPlotGrid <- grid.arrange(p, tbl, ncol=2, widths=c(3.5,1))
+# 
+# #toSaveGrid <- arrangeGrob(p, tbl, ncol=2, widths=c(3.5,1))
+# #ggsave(file="Meetings/MnADifferencesSegments.jpg", toSaveGrid, width=16, height=10, dpi=300)
+```
+
+
+```{r}
+# seeing differences in between breakpoints in the MnA variable
+# this looks at and compares EACH OF THE DIFFERENT SEGMENTS between breakpoints
+for (i in 1:nrow(wholeResults)) {
+  breakpoints <- c(0,wholeResults[i,]$Breakpoints[[1]], wholeResults[i,"NumInSample"])
+  
+  MnAVecs <- list()
+  
+  for (j in 2:length(breakpoints)) {
+
+    
+    # establish the current dataset that we are working with
+    currDataset = dataset %>% filter(Year >= year) %>% filter(Year <= year)
+    if (wholeResults[i, "Firm"] != "All") {
+      currDataset = currDataset %>% filter(FirmName == wholeResults[i, "Firm"])
+    }
+    # Sort data frame by decreasing Output variable
+    currDataset <- currDataset[order(currDataset$Output, decreasing=TRUE),]
+    
+    year <- wholeResults[i,"YearFrom"]
+    breakpoint <- breakpoints[j]
+    MnAVecs[[(j-1)]] <- currDataset$MnA[(breakpoints[(j-1)]+1):breakpoints[j]]
+  }
+  for (mnas in MnAVecs) {
+    print(summary(mnas))
+  }
+  wholeResults[i,"pVals"] <- 1
+}
+
+```
+
+
+To save the wholeResults table:
+```{r, eval=FALSE}
+#if (shouldSave) {
+#  save(wholeResults, file = 'Data/YearlyCutoffAccuracies.RData')
+#}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+Here we use the independent variable *Individual MnA* as the output, with the cutoff being firms with $MnA>0$ and those with $MnA=0$.
+```{r}
+##### Initialization variables
+# Rolling window, in number of years
+
+results = data.frame(accuracy=numeric(0), numPredicted=numeric(0), MnACoeff=numeric(0))
+
+for (rollingWindow in 1:20) {
+  # Set the main covariates
+  dataset = df %>% select(MnA, FirmName, Year, Lawyers, Lawyers2, Equity, IPO, Leverage, GrossRev)
+  
+  # Merge into one main dataset
+  dataset = dataset %>% na.omit() %>% filter(Year <= 2015) %>% filter(Year >= 2015 - rollingWindow + 1)
+  
+  
+  # Create the 2 groups
+  #currDataset = currDataset %>% mutate(isTop = Output>=outputCutoff) 
+  dataset = dataset %>% mutate(isTop = MnA>0)
+  
+  # Run model
+  model = glm(isTop ~ ., data = dataset[,-2]) # remove the firm name from model
+  
+  # Extract results
+  coeffs = summary(model)$coefficients[, 1]
+  predictions = predict(model, newdata=dataset[,-2], type="response") # remove the firm name from model
+  predictions = predictions > 0.5
+  accuracy = sum(predictions==dataset$isTop) / nrow(dataset)
+  numPredicted = sum(predictions)
+  
+  
+
+  # Populate results table
+  results <-rbind(results, data.frame("accuracy"=accuracy, "numPredicted"=sum(predictions), "MnACoeff"=coeffs["MnA"]))
+}
+
+rownames(results) <- 1:nrow(results)
+ggplot(data=results, aes(x=1:nrow(results), y=accuracy)) + geom_line() +  geom_point(color="red") +
+  ggtitle("Accuracy of Top = (Mna > 0) relative to Rolling Window") + ylab("Accuracy (%)") + xlab("Rolling Window (Years)")
+
+
+results
+```

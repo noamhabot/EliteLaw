@@ -1,0 +1,159 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf830
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Tahoma;\f2\froman\fcharset0 TimesNewRomanPSMT;
+}
+{\colortbl;\red255\green255\blue255;\red25\green25\blue25;\red255\green255\blue255;}
+{\*\expandedcolortbl;;\cssrgb\c12941\c12941\c12941;\cssrgb\c100000\c100000\c100000;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}.}{\leveltext\leveltemplateid1\'02\'00.;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+{\info
+{\author Noam Habot}}\margl1440\margr1440\vieww10800\viewh10280\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 net operating income\
+ipo = revenue from ipo\
+leverage = equity partners\
+aggregated ma = sum of ma from all firms for one year\
+all the data is yearly\
+\
+top10 = the top 10th single law firm\
+\
+\
+\
+download-data = accepts raw data and output elitelawdf.rdata\
+dataviz - makes correlations and plots\
+previousworkwithconstants\
+	- core\
+	- generates regressions, settings, save all the results\
+generatelatex\
+writetolatex\
+\
+goal - what makes a law firm elite is the value of MnA - firms should focus on their MnA \
+\
+how does MnA coefficient work for firms that are on the top versus on the bottom\
+\
+\
+\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b \cf0 5/3/17
+\b0 \
+- when looking for cutpoint, look for crosssection for one specific year\
+- by each year, know basic statistics about individual MnA \
+\
+rank by independent variable (MnA) - \
+plot of independent MnA for that firm, by year\
+\
+\
+for individual MnA - know the min, max, num/datapoints for that year that are positive\
+\
+\
+drawn plot: (individual MnA) - find summary statistics for this\
+1985, scatter - how many are positive, balls for density at 0\
+\
+\
+
+\b 6/8/17\
+\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sl360\partightenfactor0
+\ls1\ilvl0
+\f1\b0\fs30 \cf2 \cb3 {\listtext	1.	}\expnd0\expndtw0\kerning0
+Another way to think about testing over time would be to take the coefficients for the regression for the top firms and then conduct Chow tests to determine when and how the coefficients change over time. For example, is the 2015 regression for the top firms statistically different from the 2008 regression for the top firms? If this formulation of the test makes sense, then to start the analysis on a test basis I would check 2015 against every preceding year, both for the cross section year as a whole and for the top firms. Again, does this make sense?\'a0\cb1 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b\fs24 \cf0 \kerning1\expnd0\expndtw0 \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b0 \cf0 \
+\
+6/14\
+\
+- does the math incorporate the number of sample points per year in the calculation of the breakpoints?\
+\
+- try ppep as the rnaking\
+- does mna model rely on higher leverage?\
+- red/blue plot: top firms, then all other firms\
+\
+tier 1 tier 2 tier 3 (tier 4) regressions\
+	- plot the coefficients by tier, by year\
+	- blue line = top tier regressions\
+	- red line = 2nd tier mna coefficients\
+	\
+1988-2015\
+1997-2015\
+1994-2015\
+\
+\
+add total number of sample per year on the right plot (MNADifferencesSegments)\
+Years ~ num in samples ~ Breakpoint ~ p-value\
+\
+NAIL THIS DOWN FIRST AND THEN TO PPEP\
+\
+\
+\
+the ppep regressions - same variables?\
+	-YES\
+\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b\fs34 \cf0 6/28
+\b0\fs24 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs32 \cf2 \expnd0\expndtw0\kerning0
+My curiosity is to see the results for the full panel regressions on PPEP using the various specifications and techniques that we employed for Rev/lawyer before even getting to the regression break question. Put another way, how much of a difference does it make as to whether we use PPEP or Rev/lawyer as the dependent variable? What's the correlation between the two and does the difference show up in the coefficients? And, to the extent there are differences, what, if anything, can we learn from them?\
+\
+\
+6/30\
+\
+it's not which to use (PPEP or rev/lawyer)\
+\
+\
+various measures of dependent variables of firm performance\
+no matter how you measure financial performance, MnA is always important\
+\
+\
+step back from breakpoints stuff\
+go back to the regressions\
+look at slide deck\
+correlations between rev/lawyer and ppep = already done\
+want to see that MnA is the thing\
+\
+\
+\
+can we learn more to understand where mna is important, why it is important, what may substitute for it\
+how why where?\
+\
+\
+\
+where code and slide deck go together\
+\
+\
+firm fixed effect = each firm has different coefficient. having it / removing it changes magnitude of coefficients\
+\
+\
+we want to present all of the models that have MNA p-value significant\
+only financial performance measures as dependent variables\
+how different is it between different specifications \
+\
+look for anything that does not replicate between code and slide deck\
+if something does not match, email them directly\
+\
+
+\b 9/25/17
+\b0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \kerning1\expnd0\expndtw0 move forward with dirty dataset\
+generate exactly the data and all the tables for the paper\
+\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b \cf0 10/5/17
+\b0  - met with Professor Hodrick\
+\
+}
