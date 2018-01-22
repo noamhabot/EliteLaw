@@ -3,13 +3,11 @@
 \usepackage{graphicx}
 \usepackage{multirow}
 \usepackage{float}
-\usepackage[landscape, margin=1in]{geometry}
+\usepackage[landscape, margin=1in, tmargin=0.5in, bmargin=0.5in]{geometry}
 \begin{document}
 \begin{center}{\LARGE Elite Law Analysis}
 \\
-\begin{tabular}{rl}\\Professor Joseph Grundfest, Professor Laurie Hodrick, Noam Habot \\January 2018\end{tabular}\end{center}
-{\large \textbf{Summary Statistics} }
-% latex table generated in R 3.3.2 by xtable 1.8-2 package
+\begin{tabular}{rl}\\Professor Joseph Grundfest, Professor Laurie Hodrick, Noam Habot \\January 2018\end{tabular}\end{center}{\large \textbf{Summary Statistics} }% latex table generated in R 3.3.2 by xtable 1.8-2 package
 % Thu Jan 18 14:07:43 2018
 \begin{table}[H]
 \centering
@@ -79,9 +77,7 @@ Min & 0 & 0 & 507 & 0 & 0 & 0 & 0 & 49,459 \\
 \end{table}
 
 \newpage
-
-{\large \textbf{Correlations} }
-% latex table generated in R 3.3.2 by xtable 1.8-2 package
+{\large \textbf{Correlations} }% latex table generated in R 3.3.2 by xtable 1.8-2 package
 % Thu Jan 18 14:13:06 2018
 \begin{table}[H]
 \centering
@@ -127,9 +123,7 @@ Lawyers & 0.776 & 0.124 & 0.297 & 0.350 & 0.189 & 0.149 \\
 \end{table}
 
 \newpage
-
 {\large \textbf{Correlations with AggM\&A and GDP} }
-
 \begin{figure}[H]\centering
 \includegraphics[width=0.85\textwidth]{../IndivTexOutput/MnAGDP-1.jpg}\end{figure}
 
@@ -177,9 +171,7 @@ Rank 1 & 0.733 & 0.994 & 0.840 & 0.908 & 0.755 & 0.972 & 0.750 & 0.982 & 0.851 &
 \end{table}
 
 \newpage
-
 {\large \textbf{Regressions} }
-
 \begin{table}[H]
 \centering
 \begin{tabular}{|clllllllll|}
@@ -2611,6 +2603,608 @@ Lawyers &  &  &  &  &  &  &  &  & \\
 
 
 \newpage
+{\large \textbf{Regression Performance} }% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+1 & Gross Rev & Revenue + Deals & Lawyers^2 & FirmFE\_FE3 & 0.88 & 1990 & 1991 & 1368 \\ 
+  2 & Gross Rev & Revenue + Deals & Lawyers^2 & FirmFE\_FE1 & 0.87 & 1991 & 1992 & 1390 \\ 
+  3 & Gross Rev & Revenue + Deals & Lawyers^2 & FirmFE\_FEYear & 0.9 & 1978 & 1981 & 1065 \\ 
+  4 & Gross Rev & Revenue + Deals & Lawyers^2 & FirmFE\_NoFE & 0.87 & 1994 & 1995 & 1469 \\ 
+  5 & Gross Rev & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.88 & 1990 & 1991 & 1368 \\ 
+  6 & Gross Rev & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.87 & 1991 & 1992 & 1389 \\ 
+  7 & Gross Rev & Revenue + Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.9 & 1978 & 1981 & 1065 \\ 
+  8 & Gross Rev & Revenue + Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.87 & 1994 & 1995 & 1465 \\ 
+  9 & Gross Rev & Revenue + Deals & Lawyers^2 & Lawyers\_NoFE & 0.81 & 2012 & 2012 & 2093 \\ 
+  10 & Gross Rev & Revenue + Deals & log(Lawyers) & FirmFE\_FE3 & 0.87 & 1992 & 1993 & 1420 \\ 
+  11 & Gross Rev & Revenue + Deals & log(Lawyers) & FirmFE\_FE1 & 0.87 & 1993 & 1994 & 1440 \\ 
+  12 & Gross Rev & Revenue + Deals & log(Lawyers) & FirmFE\_FEYear & 0.9 & 1979 & 1982 & 1095 \\ 
+  13 & Gross Rev & Revenue + Deals & log(Lawyers) & FirmFE\_NoFE & 0.86 & 1996 & 1996 & 1518 \\ 
+  14 & Gross Rev & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.87 & 1992 & 1993 & 1421 \\ 
+  15 & Gross Rev & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.87 & 1993 & 1994 & 1444 \\ 
+  16 & Gross Rev & Revenue + Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.9 & 1979 & 1982 & 1097 \\ 
+  17 & Gross Rev & Revenue + Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.86 & 1996 & 1996 & 1521 \\ 
+  18 & Gross Rev & Revenue + Deals & log(Lawyers) & Lawyers\_NoFE & 0.8 & 2015 & 2016 & 2244 \\ 
+  19 & Gross Rev & Revenue + Deals & No & FirmFE\_FE3 & 0.61 & 2047 & 2048 & 4277 \\ 
+  20 & Gross Rev & Revenue + Deals & No & FirmFE\_FE1 & 0.61 & 2048 & 2048 & 4331 \\ 
+  21 & Gross Rev & Revenue + Deals & No & FirmFE\_FEYear & 0.67 & 2040 & 2043 & 3681 \\ 
+  22 & Gross Rev & Revenue + Deals & No & FirmFE\_NoFE & 0.6 & 2049 & 2050 & 4426 \\ 
+  23 & Gross Rev & Revenue + Deals & No & NoFirmFE\_FE3 & 0.61 & 2047 & 2048 & 4271 \\ 
+  24 & Gross Rev & Revenue + Deals & No & NoFirmFE\_FE1 & 0.61 & 2048 & 2048 & 4319 \\ 
+  25 & Gross Rev & Revenue + Deals & No & NoFirmFE\_FEYear & 0.67 & 2040 & 2043 & 3698 \\ 
+  26 & Gross Rev & Revenue + Deals & No & NoFirmFE\_NoFE & 0.6 & 2049 & 2050 & 4420 \\ 
+  27 & Gross Rev & Revenue & Lawyers^2 & FirmFE\_FE3 & 0.87 & 1994 & 1995 & 1479 \\ 
+  28 & Gross Rev & Revenue & Lawyers^2 & FirmFE\_FE1 & 0.86 & 1995 & 1995 & 1493 \\ 
+  29 & Gross Rev & Revenue & Lawyers^2 & FirmFE\_FEYear & 0.89 & 1983 & 1985 & 1171 \\ 
+  30 & Gross Rev & Revenue & Lawyers^2 & FirmFE\_NoFE & 0.86 & 1997 & 1998 & 1579 \\ 
+  31 & Gross Rev & Revenue & Lawyers^2 & NoFirmFE\_FE3 & 0.87 & 1994 & 1995 & 1475 \\ 
+  32 & Gross Rev & Revenue & Lawyers^2 & NoFirmFE\_FE1 & 0.86 & 1995 & 1995 & 1491 \\ 
+  33 & Gross Rev & Revenue & Lawyers^2 & NoFirmFE\_FEYear & 0.89 & 1983 & 1985 & 1172 \\ 
+  34 & Gross Rev & Revenue & Lawyers^2 & NoFirmFE\_NoFE & 0.86 & 1997 & 1998 & 1575 \\ 
+  35 & Gross Rev & Revenue & Lawyers^2 & Lawyers\_NoFE & 0.81 & 2012 & 2012 & 2095 \\ 
+  36 & Gross Rev & Revenue & log(Lawyers) & FirmFE\_FE3 & 0.86 & 1997 & 1997 & 1557 \\ 
+  37 & Gross Rev & Revenue & log(Lawyers) & FirmFE\_FE1 & 0.86 & 1997 & 1998 & 1568 \\ 
+  38 & Gross Rev & Revenue & log(Lawyers) & FirmFE\_FEYear & 0.89 & 1985 & 1988 & 1230 \\ 
+  39 & Gross Rev & Revenue & log(Lawyers) & FirmFE\_NoFE & 0.85 & 2000 & 2000 & 1652 \\ 
+  40 & Gross Rev & Revenue & log(Lawyers) & NoFirmFE\_FE3 & 0.86 & 1997 & 1997 & 1550 \\ 
+   \hline
+\end{tabular}
+\end{table}
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+41 & Gross Rev & Revenue & log(Lawyers) & NoFirmFE\_FE1 & 0.86 & 1997 & 1998 & 1569 \\ 
+  42 & Gross Rev & Revenue & log(Lawyers) & NoFirmFE\_FEYear & 0.89 & 1985 & 1988 & 1225 \\ 
+  43 & Gross Rev & Revenue & log(Lawyers) & NoFirmFE\_NoFE & 0.85 & 2000 & 2000 & 1653 \\ 
+  44 & Gross Rev & Revenue & log(Lawyers) & Lawyers\_NoFE & 0.8 & 2015 & 2016 & 2247 \\ 
+  45 & Gross Rev & Revenue & No & FirmFE\_FE3 & 0.4 & 2069 & 2070 & 6635 \\ 
+  46 & Gross Rev & Revenue & No & FirmFE\_FE1 & 0.4 & 2069 & 2070 & 6670 \\ 
+  47 & Gross Rev & Revenue & No & FirmFE\_FEYear & 0.47 & 2063 & 2065 & 5804 \\ 
+  48 & Gross Rev & Revenue & No & FirmFE\_NoFE & 0.38 & 2070 & 2071 & 6809 \\ 
+  49 & Gross Rev & Revenue & No & NoFirmFE\_FE3 & 0.4 & 2069 & 2070 & 6648 \\ 
+  50 & Gross Rev & Revenue & No & NoFirmFE\_FE1 & 0.4 & 2069 & 2070 & 6670 \\ 
+  51 & Gross Rev & Revenue & No & NoFirmFE\_FEYear & 0.47 & 2063 & 2065 & 5811 \\ 
+  52 & Gross Rev & Revenue & No & NoFirmFE\_NoFE & 0.38 & 2070 & 2071 & 6829 \\ 
+  53 & Gross Rev & Deals & Lawyers^2 & FirmFE\_FE3 & 0.87 & 1994 & 1995 & 1479 \\ 
+  54 & Gross Rev & Deals & Lawyers^2 & FirmFE\_FE1 & 0.86 & 1995 & 1996 & 1507 \\ 
+  55 & Gross Rev & Deals & Lawyers^2 & FirmFE\_FEYear & 0.89 & 1984 & 1987 & 1202 \\ 
+  56 & Gross Rev & Deals & Lawyers^2 & FirmFE\_NoFE & 0.85 & 1998 & 1999 & 1608 \\ 
+  57 & Gross Rev & Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.87 & 1994 & 1995 & 1479 \\ 
+  58 & Gross Rev & Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.86 & 1995 & 1996 & 1502 \\ 
+  59 & Gross Rev & Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.89 & 1984 & 1987 & 1205 \\ 
+  60 & Gross Rev & Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.85 & 1998 & 1999 & 1603 \\ 
+  61 & Gross Rev & Deals & Lawyers^2 & Lawyers\_NoFE & 0.81 & 2012 & 2012 & 2091 \\ 
+  62 & Gross Rev & Deals & log(Lawyers) & FirmFE\_FE3 & 0.86 & 1996 & 1997 & 1530 \\ 
+  63 & Gross Rev & Deals & log(Lawyers) & FirmFE\_FE1 & 0.86 & 1997 & 1997 & 1549 \\ 
+  64 & Gross Rev & Deals & log(Lawyers) & FirmFE\_FEYear & 0.89 & 1985 & 1988 & 1238 \\ 
+  65 & Gross Rev & Deals & log(Lawyers) & FirmFE\_NoFE & 0.85 & 2000 & 2001 & 1658 \\ 
+  66 & Gross Rev & Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.86 & 1996 & 1997 & 1527 \\ 
+  67 & Gross Rev & Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.86 & 1997 & 1997 & 1557 \\ 
+  68 & Gross Rev & Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.89 & 1985 & 1988 & 1239 \\ 
+  69 & Gross Rev & Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.85 & 2000 & 2001 & 1656 \\ 
+  70 & Gross Rev & Deals & log(Lawyers) & Lawyers\_NoFE & 0.8 & 2015 & 2016 & 2246 \\ 
+  71 & Gross Rev & Deals & No & FirmFE\_FE3 & 0.61 & 2047 & 2048 & 4283 \\ 
+  72 & Gross Rev & Deals & No & FirmFE\_FE1 & 0.61 & 2048 & 2049 & 4353 \\ 
+  73 & Gross Rev & Deals & No & FirmFE\_FEYear & 0.66 & 2041 & 2043 & 3725 \\ 
+  74 & Gross Rev & Deals & No & FirmFE\_NoFE & 0.6 & 2049 & 2050 & 4473 \\ 
+  75 & Gross Rev & Deals & No & NoFirmFE\_FE3 & 0.61 & 2047 & 2048 & 4283 \\ 
+  76 & Gross Rev & Deals & No & NoFirmFE\_FE1 & 0.61 & 2048 & 2049 & 4340 \\ 
+  77 & Gross Rev & Deals & No & NoFirmFE\_FEYear & 0.66 & 2041 & 2043 & 3717 \\ 
+  78 & Gross Rev & Deals & No & NoFirmFE\_NoFE & 0.6 & 2049 & 2050 & 4457 \\ 
+  79 & Gross Rev/Lawyer & Revenue + Deals & Lawyers^2 & FirmFE\_FE3 & 0.38 & 1362 & 1363 & 4450 \\ 
+  80 & Gross Rev/Lawyer & Revenue + Deals & Lawyers^2 & FirmFE\_FE1 & 0.38 & 1362 & 1362 & 4443 \\ 
+   \hline
+\end{tabular}
+\end{table}
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+81 & Gross Rev/Lawyer & Revenue + Deals & Lawyers^2 & FirmFE\_FEYear & 0.59 & 1342 & 1344 & 2977 \\ 
+  82 & Gross Rev/Lawyer & Revenue + Deals & Lawyers^2 & FirmFE\_NoFE & 0.3 & 1368 & 1368 & 5035 \\ 
+  83 & Gross Rev/Lawyer & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.38 & 1362 & 1363 & 4448 \\ 
+  84 & Gross Rev/Lawyer & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.38 & 1362 & 1362 & 4446 \\ 
+  85 & Gross Rev/Lawyer & Revenue + Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.59 & 1342 & 1344 & 2976 \\ 
+  86 & Gross Rev/Lawyer & Revenue + Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.3 & 1368 & 1368 & 5031 \\ 
+  87 & Gross Rev/Lawyer & Revenue + Deals & Lawyers^2 & Lawyers\_NoFE & 0.08 & 1381 & 1382 & 6574 \\ 
+  88 & Gross Rev/Lawyer & Revenue + Deals & log(Lawyers) & FirmFE\_FE3 & 0.38 & 1362 & 1363 & 4495 \\ 
+  89 & Gross Rev/Lawyer & Revenue + Deals & log(Lawyers) & FirmFE\_FE1 & 0.38 & 1362 & 1363 & 4486 \\ 
+  90 & Gross Rev/Lawyer & Revenue + Deals & log(Lawyers) & FirmFE\_FEYear & 0.59 & 1342 & 1344 & 2973 \\ 
+  91 & Gross Rev/Lawyer & Revenue + Deals & log(Lawyers) & FirmFE\_NoFE & 0.3 & 1368 & 1369 & 5072 \\ 
+  92 & Gross Rev/Lawyer & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.38 & 1362 & 1363 & 4482 \\ 
+  93 & Gross Rev/Lawyer & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.38 & 1362 & 1363 & 4498 \\ 
+  94 & Gross Rev/Lawyer & Revenue + Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.59 & 1342 & 1344 & 2975 \\ 
+  95 & Gross Rev/Lawyer & Revenue + Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.3 & 1368 & 1369 & 5076 \\ 
+  96 & Gross Rev/Lawyer & Revenue + Deals & log(Lawyers) & Lawyers\_NoFE & 0.06 & 1383 & 1383 & 6760 \\ 
+  97 & Gross Rev/Lawyer & Revenue + Deals & No & FirmFE\_FE3 & 0.37 & 1362 & 1363 & 4531 \\ 
+  98 & Gross Rev/Lawyer & Revenue + Deals & No & FirmFE\_FE1 & 0.37 & 1363 & 1363 & 4525 \\ 
+  99 & Gross Rev/Lawyer & Revenue + Deals & No & FirmFE\_FEYear & 0.57 & 1344 & 1347 & 3111 \\ 
+  100 & Gross Rev/Lawyer & Revenue + Deals & No & FirmFE\_NoFE & 0.29 & 1369 & 1369 & 5113 \\ 
+  101 & Gross Rev/Lawyer & Revenue + Deals & No & NoFirmFE\_FE3 & 0.37 & 1362 & 1363 & 4527 \\ 
+  102 & Gross Rev/Lawyer & Revenue + Deals & No & NoFirmFE\_FE1 & 0.37 & 1363 & 1363 & 4535 \\ 
+  103 & Gross Rev/Lawyer & Revenue + Deals & No & NoFirmFE\_FEYear & 0.57 & 1344 & 1347 & 3112 \\ 
+  104 & Gross Rev/Lawyer & Revenue + Deals & No & NoFirmFE\_NoFE & 0.29 & 1369 & 1369 & 5127 \\ 
+  105 & Gross Rev/Lawyer & Revenue & Lawyers^2 & FirmFE\_FE3 & 0.37 & 1363 & 1363 & 4545 \\ 
+  106 & Gross Rev/Lawyer & Revenue & Lawyers^2 & FirmFE\_FE1 & 0.37 & 1363 & 1363 & 4558 \\ 
+  107 & Gross Rev/Lawyer & Revenue & Lawyers^2 & FirmFE\_FEYear & 0.58 & 1343 & 1345 & 3036 \\ 
+  108 & Gross Rev/Lawyer & Revenue & Lawyers^2 & FirmFE\_NoFE & 0.28 & 1369 & 1370 & 5162 \\ 
+  109 & Gross Rev/Lawyer & Revenue & Lawyers^2 & NoFirmFE\_FE3 & 0.37 & 1363 & 1363 & 4552 \\ 
+  110 & Gross Rev/Lawyer & Revenue & Lawyers^2 & NoFirmFE\_FE1 & 0.37 & 1363 & 1363 & 4551 \\ 
+  111 & Gross Rev/Lawyer & Revenue & Lawyers^2 & NoFirmFE\_FEYear & 0.58 & 1343 & 1345 & 3032 \\ 
+  112 & Gross Rev/Lawyer & Revenue & Lawyers^2 & NoFirmFE\_NoFE & 0.28 & 1369 & 1370 & 5162 \\ 
+  113 & Gross Rev/Lawyer & Revenue & Lawyers^2 & Lawyers\_NoFE & 0.08 & 1381 & 1382 & 6575 \\ 
+  114 & Gross Rev/Lawyer & Revenue & log(Lawyers) & FirmFE\_FE3 & 0.36 & 1363 & 1364 & 4596 \\ 
+  115 & Gross Rev/Lawyer & Revenue & log(Lawyers) & FirmFE\_FE1 & 0.36 & 1363 & 1364 & 4608 \\ 
+  116 & Gross Rev/Lawyer & Revenue & log(Lawyers) & FirmFE\_FEYear & 0.58 & 1343 & 1345 & 3043 \\ 
+  117 & Gross Rev/Lawyer & Revenue & log(Lawyers) & FirmFE\_NoFE & 0.28 & 1370 & 1370 & 5230 \\ 
+  118 & Gross Rev/Lawyer & Revenue & log(Lawyers) & NoFirmFE\_FE3 & 0.36 & 1363 & 1364 & 4609 \\ 
+  119 & Gross Rev/Lawyer & Revenue & log(Lawyers) & NoFirmFE\_FE1 & 0.36 & 1363 & 1364 & 4600 \\ 
+  120 & Gross Rev/Lawyer & Revenue & log(Lawyers) & NoFirmFE\_FEYear & 0.58 & 1343 & 1345 & 3046 \\ 
+   \hline
+\end{tabular}
+\end{table}
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+121 & Gross Rev/Lawyer & Revenue & log(Lawyers) & NoFirmFE\_NoFE & 0.28 & 1370 & 1370 & 5215 \\ 
+  122 & Gross Rev/Lawyer & Revenue & log(Lawyers) & Lawyers\_NoFE & 0.06 & 1383 & 1383 & 6753 \\ 
+  123 & Gross Rev/Lawyer & Revenue & No & FirmFE\_FE3 & 0.36 & 1363 & 1364 & 4596 \\ 
+  124 & Gross Rev/Lawyer & Revenue & No & FirmFE\_FE1 & 0.36 & 1363 & 1364 & 4608 \\ 
+  125 & Gross Rev/Lawyer & Revenue & No & FirmFE\_FEYear & 0.57 & 1344 & 1346 & 3115 \\ 
+  126 & Gross Rev/Lawyer & Revenue & No & FirmFE\_NoFE & 0.27 & 1370 & 1370 & 5222 \\ 
+  127 & Gross Rev/Lawyer & Revenue & No & NoFirmFE\_FE3 & 0.36 & 1363 & 1364 & 4602 \\ 
+  128 & Gross Rev/Lawyer & Revenue & No & NoFirmFE\_FE1 & 0.36 & 1363 & 1364 & 4601 \\ 
+  129 & Gross Rev/Lawyer & Revenue & No & NoFirmFE\_FEYear & 0.57 & 1344 & 1346 & 3116 \\ 
+  130 & Gross Rev/Lawyer & Revenue & No & NoFirmFE\_NoFE & 0.27 & 1370 & 1370 & 5224 \\ 
+  131 & Gross Rev/Lawyer & Deals & Lawyers^2 & FirmFE\_FE3 & 0.33 & 1366 & 1367 & 4850 \\ 
+  132 & Gross Rev/Lawyer & Deals & Lawyers^2 & FirmFE\_FE1 & 0.33 & 1366 & 1367 & 4856 \\ 
+  133 & Gross Rev/Lawyer & Deals & Lawyers^2 & FirmFE\_FEYear & 0.51 & 1350 & 1353 & 3510 \\ 
+  134 & Gross Rev/Lawyer & Deals & Lawyers^2 & FirmFE\_NoFE & 0.23 & 1373 & 1373 & 5570 \\ 
+  135 & Gross Rev/Lawyer & Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.33 & 1366 & 1367 & 4848 \\ 
+  136 & Gross Rev/Lawyer & Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.33 & 1366 & 1367 & 4858 \\ 
+  137 & Gross Rev/Lawyer & Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.51 & 1350 & 1353 & 3514 \\ 
+  138 & Gross Rev/Lawyer & Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.23 & 1373 & 1373 & 5572 \\ 
+  139 & Gross Rev/Lawyer & Deals & Lawyers^2 & Lawyers\_NoFE & 0.08 & 1381 & 1382 & 6573 \\ 
+  140 & Gross Rev/Lawyer & Deals & log(Lawyers) & FirmFE\_FE3 & 0.32 & 1366 & 1367 & 4885 \\ 
+  141 & Gross Rev/Lawyer & Deals & log(Lawyers) & FirmFE\_FE1 & 0.32 & 1366 & 1367 & 4884 \\ 
+  142 & Gross Rev/Lawyer & Deals & log(Lawyers) & FirmFE\_FEYear & 0.51 & 1350 & 1353 & 3512 \\ 
+  143 & Gross Rev/Lawyer & Deals & log(Lawyers) & FirmFE\_NoFE & 0.22 & 1373 & 1374 & 5616 \\ 
+  144 & Gross Rev/Lawyer & Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.32 & 1366 & 1367 & 4885 \\ 
+  145 & Gross Rev/Lawyer & Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.32 & 1366 & 1367 & 4896 \\ 
+  146 & Gross Rev/Lawyer & Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.51 & 1350 & 1353 & 3518 \\ 
+  147 & Gross Rev/Lawyer & Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.22 & 1373 & 1374 & 5613 \\ 
+  148 & Gross Rev/Lawyer & Deals & log(Lawyers) & Lawyers\_NoFE & 0.06 & 1383 & 1383 & 6757 \\ 
+  149 & Gross Rev/Lawyer & Deals & No & FirmFE\_FE3 & 0.31 & 1367 & 1368 & 4972 \\ 
+  150 & Gross Rev/Lawyer & Deals & No & FirmFE\_FE1 & 0.31 & 1367 & 1368 & 4969 \\ 
+  151 & Gross Rev/Lawyer & Deals & No & FirmFE\_FEYear & 0.49 & 1353 & 1355 & 3712 \\ 
+  152 & Gross Rev/Lawyer & Deals & No & FirmFE\_NoFE & 0.21 & 1374 & 1374 & 5693 \\ 
+  153 & Gross Rev/Lawyer & Deals & No & NoFirmFE\_FE3 & 0.31 & 1367 & 1368 & 4976 \\ 
+  154 & Gross Rev/Lawyer & Deals & No & NoFirmFE\_FE1 & 0.31 & 1367 & 1368 & 4974 \\ 
+  155 & Gross Rev/Lawyer & Deals & No & NoFirmFE\_FEYear & 0.49 & 1353 & 1355 & 3711 \\ 
+  156 & Gross Rev/Lawyer & Deals & No & NoFirmFE\_NoFE & 0.21 & 1374 & 1374 & 5697 \\ 
+  157 & Gross Rev/Eq Partner & Revenue + Deals & Lawyers^2 & FirmFE\_FE3 & 0.69 & 1496 & 1497 & 0 \\ 
+  158 & Gross Rev/Eq Partner & Revenue + Deals & Lawyers^2 & FirmFE\_FE1 & 0.69 & 1497 & 1497 & 0 \\ 
+  159 & Gross Rev/Eq Partner & Revenue + Deals & Lawyers^2 & FirmFE\_FEYear & 0.78 & 1480 & 1483 & 0 \\ 
+  160 & Gross Rev/Eq Partner & Revenue + Deals & Lawyers^2 & FirmFE\_NoFE & 0.66 & 1501 & 1502 & 0 \\ 
+   \hline
+\end{tabular}
+\end{table}
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+161 & Gross Rev/Eq Partner & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.69 & 1496 & 1497 & 0 \\ 
+  162 & Gross Rev/Eq Partner & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.69 & 1497 & 1497 & 0 \\ 
+  163 & Gross Rev/Eq Partner & Revenue + Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.78 & 1480 & 1483 & 0 \\ 
+  164 & Gross Rev/Eq Partner & Revenue + Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.66 & 1501 & 1502 & 0 \\ 
+  165 & Gross Rev/Eq Partner & Revenue + Deals & Lawyers^2 & Lawyers\_NoFE & 0.19 & 1545 & 1545 & 0 \\ 
+  166 & Gross Rev/Eq Partner & Revenue + Deals & log(Lawyers) & FirmFE\_FE3 & 0.69 & 1497 & 1498 & 0 \\ 
+  167 & Gross Rev/Eq Partner & Revenue + Deals & log(Lawyers) & FirmFE\_FE1 & 0.69 & 1497 & 1498 & 0 \\ 
+  168 & Gross Rev/Eq Partner & Revenue + Deals & log(Lawyers) & FirmFE\_FEYear & 0.78 & 1480 & 1483 & 0 \\ 
+  169 & Gross Rev/Eq Partner & Revenue + Deals & log(Lawyers) & FirmFE\_NoFE & 0.66 & 1502 & 1503 & 0 \\ 
+  170 & Gross Rev/Eq Partner & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.69 & 1497 & 1498 & 0 \\ 
+  171 & Gross Rev/Eq Partner & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.69 & 1497 & 1498 & 0 \\ 
+  172 & Gross Rev/Eq Partner & Revenue + Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.78 & 1480 & 1483 & 0 \\ 
+  173 & Gross Rev/Eq Partner & Revenue + Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.66 & 1502 & 1503 & 0 \\ 
+  174 & Gross Rev/Eq Partner & Revenue + Deals & log(Lawyers) & Lawyers\_NoFE & 0.17 & 1546 & 1547 & 0 \\ 
+  175 & Gross Rev/Eq Partner & Revenue + Deals & No & FirmFE\_FE3 & 0.69 & 1497 & 1498 & 0 \\ 
+  176 & Gross Rev/Eq Partner & Revenue + Deals & No & FirmFE\_FE1 & 0.69 & 1498 & 1498 & 0 \\ 
+  177 & Gross Rev/Eq Partner & Revenue + Deals & No & FirmFE\_FEYear & 0.77 & 1482 & 1485 & 0 \\ 
+  178 & Gross Rev/Eq Partner & Revenue + Deals & No & FirmFE\_NoFE & 0.66 & 1502 & 1503 & 0 \\ 
+  179 & Gross Rev/Eq Partner & Revenue + Deals & No & NoFirmFE\_FE3 & 0.69 & 1497 & 1498 & 0 \\ 
+  180 & Gross Rev/Eq Partner & Revenue + Deals & No & NoFirmFE\_FE1 & 0.69 & 1498 & 1498 & 0 \\ 
+  181 & Gross Rev/Eq Partner & Revenue + Deals & No & NoFirmFE\_FEYear & 0.77 & 1482 & 1485 & 0 \\ 
+  182 & Gross Rev/Eq Partner & Revenue + Deals & No & NoFirmFE\_NoFE & 0.66 & 1502 & 1503 & 0 \\ 
+  183 & Gross Rev/Eq Partner & Revenue & Lawyers^2 & FirmFE\_FE3 & 0.69 & 1498 & 1498 & 0 \\ 
+  184 & Gross Rev/Eq Partner & Revenue & Lawyers^2 & FirmFE\_FE1 & 0.69 & 1498 & 1498 & 0 \\ 
+  185 & Gross Rev/Eq Partner & Revenue & Lawyers^2 & FirmFE\_FEYear & 0.78 & 1481 & 1484 & 0 \\ 
+  186 & Gross Rev/Eq Partner & Revenue & Lawyers^2 & FirmFE\_NoFE & 0.65 & 1503 & 1503 & 0 \\ 
+  187 & Gross Rev/Eq Partner & Revenue & Lawyers^2 & NoFirmFE\_FE3 & 0.69 & 1498 & 1498 & 0 \\ 
+  188 & Gross Rev/Eq Partner & Revenue & Lawyers^2 & NoFirmFE\_FE1 & 0.69 & 1498 & 1498 & 0 \\ 
+  189 & Gross Rev/Eq Partner & Revenue & Lawyers^2 & NoFirmFE\_FEYear & 0.78 & 1481 & 1484 & 0 \\ 
+  190 & Gross Rev/Eq Partner & Revenue & Lawyers^2 & NoFirmFE\_NoFE & 0.65 & 1503 & 1503 & 0 \\ 
+  191 & Gross Rev/Eq Partner & Revenue & Lawyers^2 & Lawyers\_NoFE & 0.19 & 1545 & 1545 & 0 \\ 
+  192 & Gross Rev/Eq Partner & Revenue & log(Lawyers) & FirmFE\_FE3 & 0.68 & 1498 & 1499 & 0 \\ 
+  193 & Gross Rev/Eq Partner & Revenue & log(Lawyers) & FirmFE\_FE1 & 0.68 & 1498 & 1499 & 0 \\ 
+  194 & Gross Rev/Eq Partner & Revenue & log(Lawyers) & FirmFE\_FEYear & 0.77 & 1482 & 1484 & 0 \\ 
+  195 & Gross Rev/Eq Partner & Revenue & log(Lawyers) & FirmFE\_NoFE & 0.65 & 1503 & 1504 & 0 \\ 
+  196 & Gross Rev/Eq Partner & Revenue & log(Lawyers) & NoFirmFE\_FE3 & 0.68 & 1498 & 1499 & 0 \\ 
+  197 & Gross Rev/Eq Partner & Revenue & log(Lawyers) & NoFirmFE\_FE1 & 0.68 & 1498 & 1499 & 0 \\ 
+  198 & Gross Rev/Eq Partner & Revenue & log(Lawyers) & NoFirmFE\_FEYear & 0.77 & 1482 & 1484 & 0 \\ 
+  199 & Gross Rev/Eq Partner & Revenue & log(Lawyers) & NoFirmFE\_NoFE & 0.65 & 1503 & 1504 & 0 \\ 
+  200 & Gross Rev/Eq Partner & Revenue & log(Lawyers) & Lawyers\_NoFE & 0.17 & 1546 & 1547 & 0 \\ 
+   \hline
+\end{tabular}
+\end{table}
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+201 & Gross Rev/Eq Partner & Revenue & No & FirmFE\_FE3 & 0.68 & 1498 & 1499 & 0 \\ 
+  202 & Gross Rev/Eq Partner & Revenue & No & FirmFE\_FE1 & 0.68 & 1499 & 1499 & 0 \\ 
+  203 & Gross Rev/Eq Partner & Revenue & No & FirmFE\_FEYear & 0.77 & 1482 & 1485 & 0 \\ 
+  204 & Gross Rev/Eq Partner & Revenue & No & FirmFE\_NoFE & 0.65 & 1504 & 1504 & 0 \\ 
+  205 & Gross Rev/Eq Partner & Revenue & No & NoFirmFE\_FE3 & 0.68 & 1498 & 1499 & 0 \\ 
+  206 & Gross Rev/Eq Partner & Revenue & No & NoFirmFE\_FE1 & 0.68 & 1499 & 1499 & 0 \\ 
+  207 & Gross Rev/Eq Partner & Revenue & No & NoFirmFE\_FEYear & 0.77 & 1482 & 1485 & 0 \\ 
+  208 & Gross Rev/Eq Partner & Revenue & No & NoFirmFE\_NoFE & 0.65 & 1504 & 1504 & 0 \\ 
+  209 & Gross Rev/Eq Partner & Deals & Lawyers^2 & FirmFE\_FE3 & 0.67 & 1501 & 1501 & 0 \\ 
+  210 & Gross Rev/Eq Partner & Deals & Lawyers^2 & FirmFE\_FE1 & 0.67 & 1501 & 1501 & 0 \\ 
+  211 & Gross Rev/Eq Partner & Deals & Lawyers^2 & FirmFE\_FEYear & 0.74 & 1488 & 1490 & 0 \\ 
+  212 & Gross Rev/Eq Partner & Deals & Lawyers^2 & FirmFE\_NoFE & 0.63 & 1506 & 1507 & 0 \\ 
+  213 & Gross Rev/Eq Partner & Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.67 & 1501 & 1501 & 0 \\ 
+  214 & Gross Rev/Eq Partner & Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.67 & 1501 & 1501 & 0 \\ 
+  215 & Gross Rev/Eq Partner & Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.74 & 1488 & 1490 & 0 \\ 
+  216 & Gross Rev/Eq Partner & Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.63 & 1506 & 1507 & 0 \\ 
+  217 & Gross Rev/Eq Partner & Deals & Lawyers^2 & Lawyers\_NoFE & 0.19 & 1545 & 1545 & 0 \\ 
+  218 & Gross Rev/Eq Partner & Deals & log(Lawyers) & FirmFE\_FE3 & 0.66 & 1501 & 1502 & 0 \\ 
+  219 & Gross Rev/Eq Partner & Deals & log(Lawyers) & FirmFE\_FE1 & 0.66 & 1501 & 1502 & 0 \\ 
+  220 & Gross Rev/Eq Partner & Deals & log(Lawyers) & FirmFE\_FEYear & 0.74 & 1488 & 1490 & 0 \\ 
+  221 & Gross Rev/Eq Partner & Deals & log(Lawyers) & FirmFE\_NoFE & 0.62 & 1507 & 1507 & 0 \\ 
+  222 & Gross Rev/Eq Partner & Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.66 & 1501 & 1502 & 0 \\ 
+  223 & Gross Rev/Eq Partner & Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.66 & 1501 & 1502 & 0 \\ 
+  224 & Gross Rev/Eq Partner & Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.74 & 1488 & 1490 & 0 \\ 
+  225 & Gross Rev/Eq Partner & Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.62 & 1507 & 1507 & 0 \\ 
+  226 & Gross Rev/Eq Partner & Deals & log(Lawyers) & Lawyers\_NoFE & 0.17 & 1546 & 1547 & 0 \\ 
+  227 & Gross Rev/Eq Partner & Deals & No & FirmFE\_FE3 & 0.66 & 1502 & 1503 & 0 \\ 
+  228 & Gross Rev/Eq Partner & Deals & No & FirmFE\_FE1 & 0.66 & 1502 & 1503 & 0 \\ 
+  229 & Gross Rev/Eq Partner & Deals & No & FirmFE\_FEYear & 0.73 & 1490 & 1492 & 0 \\ 
+  230 & Gross Rev/Eq Partner & Deals & No & FirmFE\_NoFE & 0.62 & 1508 & 1508 & 0 \\ 
+  231 & Gross Rev/Eq Partner & Deals & No & NoFirmFE\_FE3 & 0.66 & 1502 & 1503 & 0 \\ 
+  232 & Gross Rev/Eq Partner & Deals & No & NoFirmFE\_FE1 & 0.66 & 1502 & 1503 & 0 \\ 
+  233 & Gross Rev/Eq Partner & Deals & No & NoFirmFE\_FEYear & 0.73 & 1490 & 1492 & 0 \\ 
+  234 & Gross Rev/Eq Partner & Deals & No & NoFirmFE\_NoFE & 0.62 & 1508 & 1508 & 0 \\ 
+  235 & NOI & Revenue + Deals & Lawyers^2 & FirmFE\_FE3 & 0.75 & 1939 & 1940 & 489 \\ 
+  236 & NOI & Revenue + Deals & Lawyers^2 & FirmFE\_FE1 & 0.75 & 1940 & 1940 & 494 \\ 
+  237 & NOI & Revenue + Deals & Lawyers^2 & FirmFE\_FEYear & 0.79 & 1932 & 1934 & 421 \\ 
+  238 & NOI & Revenue + Deals & Lawyers^2 & FirmFE\_NoFE & 0.74 & 1941 & 1941 & 506 \\ 
+  239 & NOI & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.75 & 1939 & 1940 & 487 \\ 
+  240 & NOI & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.75 & 1940 & 1940 & 497 \\ 
+   \hline
+\end{tabular}
+\end{table}
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+241 & NOI & Revenue + Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.79 & 1932 & 1934 & 422 \\ 
+  242 & NOI & Revenue + Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.74 & 1941 & 1941 & 506 \\ 
+  243 & NOI & Revenue + Deals & Lawyers^2 & Lawyers\_NoFE & 0.63 & 1960 & 1960 & 730 \\ 
+  244 & NOI & Revenue + Deals & log(Lawyers) & FirmFE\_FE3 & 0.75 & 1940 & 1941 & 502 \\ 
+  245 & NOI & Revenue + Deals & log(Lawyers) & FirmFE\_FE1 & 0.74 & 1941 & 1942 & 508 \\ 
+  246 & NOI & Revenue + Deals & log(Lawyers) & FirmFE\_FEYear & 0.78 & 1933 & 1936 & 429 \\ 
+  247 & NOI & Revenue + Deals & log(Lawyers) & FirmFE\_NoFE & 0.74 & 1942 & 1943 & 520 \\ 
+  248 & NOI & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.75 & 1940 & 1941 & 502 \\ 
+  249 & NOI & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.74 & 1941 & 1942 & 507 \\ 
+  250 & NOI & Revenue + Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.78 & 1933 & 1936 & 432 \\ 
+  251 & NOI & Revenue + Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.74 & 1942 & 1943 & 521 \\ 
+  252 & NOI & Revenue + Deals & log(Lawyers) & Lawyers\_NoFE & 0.61 & 1962 & 1963 & 773 \\ 
+  253 & NOI & Revenue + Deals & No & FirmFE\_FE3 & 0.58 & 1965 & 1966 & 821 \\ 
+  254 & NOI & Revenue + Deals & No & FirmFE\_FE1 & 0.58 & 1966 & 1966 & 833 \\ 
+  255 & NOI & Revenue + Deals & No & FirmFE\_FEYear & 0.64 & 1958 & 1960 & 710 \\ 
+  256 & NOI & Revenue + Deals & No & FirmFE\_NoFE & 0.57 & 1967 & 1967 & 846 \\ 
+  257 & NOI & Revenue + Deals & No & NoFirmFE\_FE3 & 0.58 & 1965 & 1966 & 821 \\ 
+  258 & NOI & Revenue + Deals & No & NoFirmFE\_FE1 & 0.58 & 1966 & 1966 & 838 \\ 
+  259 & NOI & Revenue + Deals & No & NoFirmFE\_FEYear & 0.64 & 1958 & 1960 & 712 \\ 
+  260 & NOI & Revenue + Deals & No & NoFirmFE\_NoFE & 0.57 & 1967 & 1967 & 852 \\ 
+  261 & NOI & Revenue & Lawyers^2 & FirmFE\_FE3 & 0.74 & 1942 & 1943 & 517 \\ 
+  262 & NOI & Revenue & Lawyers^2 & FirmFE\_FE1 & 0.73 & 1943 & 1943 & 522 \\ 
+  263 & NOI & Revenue & Lawyers^2 & FirmFE\_FEYear & 0.77 & 1935 & 1938 & 452 \\ 
+  264 & NOI & Revenue & Lawyers^2 & FirmFE\_NoFE & 0.73 & 1944 & 1944 & 537 \\ 
+  265 & NOI & Revenue & Lawyers^2 & NoFirmFE\_FE3 & 0.74 & 1942 & 1943 & 518 \\ 
+  266 & NOI & Revenue & Lawyers^2 & NoFirmFE\_FE1 & 0.73 & 1943 & 1943 & 522 \\ 
+  267 & NOI & Revenue & Lawyers^2 & NoFirmFE\_FEYear & 0.77 & 1935 & 1938 & 451 \\ 
+  268 & NOI & Revenue & Lawyers^2 & NoFirmFE\_NoFE & 0.73 & 1944 & 1944 & 536 \\ 
+  269 & NOI & Revenue & Lawyers^2 & Lawyers\_NoFE & 0.63 & 1960 & 1960 & 731 \\ 
+  270 & NOI & Revenue & log(Lawyers) & FirmFE\_FE3 & 0.73 & 1944 & 1945 & 538 \\ 
+  271 & NOI & Revenue & log(Lawyers) & FirmFE\_FE1 & 0.72 & 1945 & 1945 & 545 \\ 
+  272 & NOI & Revenue & log(Lawyers) & FirmFE\_FEYear & 0.76 & 1937 & 1940 & 467 \\ 
+  273 & NOI & Revenue & log(Lawyers) & FirmFE\_NoFE & 0.72 & 1946 & 1946 & 558 \\ 
+  274 & NOI & Revenue & log(Lawyers) & NoFirmFE\_FE3 & 0.73 & 1944 & 1945 & 541 \\ 
+  275 & NOI & Revenue & log(Lawyers) & NoFirmFE\_FE1 & 0.72 & 1945 & 1945 & 549 \\ 
+  276 & NOI & Revenue & log(Lawyers) & NoFirmFE\_FEYear & 0.76 & 1937 & 1940 & 468 \\ 
+  277 & NOI & Revenue & log(Lawyers) & NoFirmFE\_NoFE & 0.72 & 1946 & 1946 & 561 \\ 
+  278 & NOI & Revenue & log(Lawyers) & Lawyers\_NoFE & 0.61 & 1962 & 1963 & 778 \\ 
+  279 & NOI & Revenue & No & FirmFE\_FE3 & 0.4 & 1983 & 1984 & 1183 \\ 
+  280 & NOI & Revenue & No & FirmFE\_FE1 & 0.4 & 1984 & 1984 & 1192 \\ 
+   \hline
+\end{tabular}
+\end{table}
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+281 & NOI & Revenue & No & FirmFE\_FEYear & 0.48 & 1977 & 1979 & 1035 \\ 
+  282 & NOI & Revenue & No & FirmFE\_NoFE & 0.39 & 1984 & 1985 & 1210 \\ 
+  283 & NOI & Revenue & No & NoFirmFE\_FE3 & 0.4 & 1983 & 1984 & 1184 \\ 
+  284 & NOI & Revenue & No & NoFirmFE\_FE1 & 0.4 & 1984 & 1984 & 1188 \\ 
+  285 & NOI & Revenue & No & NoFirmFE\_FEYear & 0.48 & 1977 & 1979 & 1038 \\ 
+  286 & NOI & Revenue & No & NoFirmFE\_NoFE & 0.39 & 1984 & 1985 & 1209 \\ 
+  287 & NOI & Deals & Lawyers^2 & FirmFE\_FE3 & 0.72 & 1945 & 1945 & 545 \\ 
+  288 & NOI & Deals & Lawyers^2 & FirmFE\_FE1 & 0.72 & 1945 & 1946 & 555 \\ 
+  289 & NOI & Deals & Lawyers^2 & FirmFE\_FEYear & 0.75 & 1939 & 1942 & 489 \\ 
+  290 & NOI & Deals & Lawyers^2 & FirmFE\_NoFE & 0.71 & 1947 & 1948 & 572 \\ 
+  291 & NOI & Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.72 & 1945 & 1945 & 544 \\ 
+  292 & NOI & Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.72 & 1945 & 1946 & 553 \\ 
+  293 & NOI & Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.75 & 1939 & 1942 & 489 \\ 
+  294 & NOI & Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.71 & 1947 & 1948 & 572 \\ 
+  295 & NOI & Deals & Lawyers^2 & Lawyers\_NoFE & 0.63 & 1960 & 1960 & 731 \\ 
+  296 & NOI & Deals & log(Lawyers) & FirmFE\_FE3 & 0.72 & 1946 & 1947 & 560 \\ 
+  297 & NOI & Deals & log(Lawyers) & FirmFE\_FE1 & 0.71 & 1947 & 1947 & 570 \\ 
+  298 & NOI & Deals & log(Lawyers) & FirmFE\_FEYear & 0.75 & 1940 & 1943 & 497 \\ 
+  299 & NOI & Deals & log(Lawyers) & FirmFE\_NoFE & 0.7 & 1948 & 1949 & 589 \\ 
+  300 & NOI & Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.72 & 1946 & 1947 & 558 \\ 
+  301 & NOI & Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.71 & 1947 & 1947 & 567 \\ 
+  302 & NOI & Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.75 & 1940 & 1943 & 496 \\ 
+  303 & NOI & Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.7 & 1948 & 1949 & 588 \\ 
+  304 & NOI & Deals & log(Lawyers) & Lawyers\_NoFE & 0.61 & 1962 & 1963 & 775 \\ 
+  305 & NOI & Deals & No & FirmFE\_FE3 & 0.57 & 1967 & 1968 & 853 \\ 
+  306 & NOI & Deals & No & FirmFE\_FE1 & 0.56 & 1968 & 1968 & 863 \\ 
+  307 & NOI & Deals & No & FirmFE\_FEYear & 0.62 & 1961 & 1963 & 751 \\ 
+  308 & NOI & Deals & No & FirmFE\_NoFE & 0.55 & 1969 & 1969 & 887 \\ 
+  309 & NOI & Deals & No & NoFirmFE\_FE3 & 0.57 & 1967 & 1968 & 852 \\ 
+  310 & NOI & Deals & No & NoFirmFE\_FE1 & 0.56 & 1968 & 1968 & 867 \\ 
+  311 & NOI & Deals & No & NoFirmFE\_FEYear & 0.62 & 1961 & 1963 & 754 \\ 
+  312 & NOI & Deals & No & NoFirmFE\_NoFE & 0.55 & 1969 & 1969 & 886 \\ 
+  313 & NOI/Lawyer & Revenue + Deals & Lawyers^2 & FirmFE\_FE3 & 0.29 & 1313 & 1314 & 1684 \\ 
+  314 & NOI/Lawyer & Revenue + Deals & Lawyers^2 & FirmFE\_FE1 & 0.29 & 1313 & 1314 & 1689 \\ 
+  315 & NOI/Lawyer & Revenue + Deals & Lawyers^2 & FirmFE\_FEYear & 0.42 & 1304 & 1306 & 1383 \\ 
+  316 & NOI/Lawyer & Revenue + Deals & Lawyers^2 & FirmFE\_NoFE & 0.26 & 1316 & 1317 & 1777 \\ 
+  317 & NOI/Lawyer & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.29 & 1313 & 1314 & 1693 \\ 
+  318 & NOI/Lawyer & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.29 & 1313 & 1314 & 1686 \\ 
+  319 & NOI/Lawyer & Revenue + Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.42 & 1304 & 1306 & 1391 \\ 
+  320 & NOI/Lawyer & Revenue + Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.26 & 1316 & 1317 & 1781 \\ 
+   \hline
+\end{tabular}
+\end{table}
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+321 & NOI/Lawyer & Revenue + Deals & Lawyers^2 & Lawyers\_NoFE & 0.03 & 1329 & 1330 & 2315 \\ 
+  322 & NOI/Lawyer & Revenue + Deals & log(Lawyers) & FirmFE\_FE3 & 0.3 & 1313 & 1314 & 1676 \\ 
+  323 & NOI/Lawyer & Revenue + Deals & log(Lawyers) & FirmFE\_FE1 & 0.3 & 1313 & 1314 & 1684 \\ 
+  324 & NOI/Lawyer & Revenue + Deals & log(Lawyers) & FirmFE\_FEYear & 0.43 & 1303 & 1306 & 1375 \\ 
+  325 & NOI/Lawyer & Revenue + Deals & log(Lawyers) & FirmFE\_NoFE & 0.26 & 1316 & 1317 & 1777 \\ 
+  326 & NOI/Lawyer & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.3 & 1313 & 1314 & 1683 \\ 
+  327 & NOI/Lawyer & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.3 & 1313 & 1314 & 1681 \\ 
+  328 & NOI/Lawyer & Revenue + Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.43 & 1303 & 1306 & 1374 \\ 
+  329 & NOI/Lawyer & Revenue + Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.26 & 1316 & 1317 & 1777 \\ 
+  330 & NOI/Lawyer & Revenue + Deals & log(Lawyers) & Lawyers\_NoFE & 0.01 & 1330 & 1330 & 2340 \\ 
+  331 & NOI/Lawyer & Revenue + Deals & No & FirmFE\_FE3 & 0.29 & 1314 & 1315 & 1707 \\ 
+  332 & NOI/Lawyer & Revenue + Deals & No & FirmFE\_FE1 & 0.29 & 1314 & 1315 & 1705 \\ 
+  333 & NOI/Lawyer & Revenue + Deals & No & FirmFE\_FEYear & 0.4 & 1305 & 1308 & 1429 \\ 
+  334 & NOI/Lawyer & Revenue + Deals & No & FirmFE\_NoFE & 0.25 & 1316 & 1317 & 1797 \\ 
+  335 & NOI/Lawyer & Revenue + Deals & No & NoFirmFE\_FE3 & 0.29 & 1314 & 1315 & 1706 \\ 
+  336 & NOI/Lawyer & Revenue + Deals & No & NoFirmFE\_FE1 & 0.29 & 1314 & 1315 & 1707 \\ 
+  337 & NOI/Lawyer & Revenue + Deals & No & NoFirmFE\_FEYear & 0.4 & 1305 & 1308 & 1434 \\ 
+  338 & NOI/Lawyer & Revenue + Deals & No & NoFirmFE\_NoFE & 0.25 & 1316 & 1317 & 1799 \\ 
+  339 & NOI/Lawyer & Revenue & Lawyers^2 & FirmFE\_FE3 & 0.28 & 1314 & 1315 & 1717 \\ 
+  340 & NOI/Lawyer & Revenue & Lawyers^2 & FirmFE\_FE1 & 0.28 & 1314 & 1315 & 1714 \\ 
+  341 & NOI/Lawyer & Revenue & Lawyers^2 & FirmFE\_FEYear & 0.42 & 1304 & 1307 & 1401 \\ 
+  342 & NOI/Lawyer & Revenue & Lawyers^2 & FirmFE\_NoFE & 0.24 & 1317 & 1317 & 1813 \\ 
+  343 & NOI/Lawyer & Revenue & Lawyers^2 & NoFirmFE\_FE3 & 0.28 & 1314 & 1315 & 1712 \\ 
+  344 & NOI/Lawyer & Revenue & Lawyers^2 & NoFirmFE\_FE1 & 0.28 & 1314 & 1315 & 1716 \\ 
+  345 & NOI/Lawyer & Revenue & Lawyers^2 & NoFirmFE\_FEYear & 0.42 & 1304 & 1307 & 1408 \\ 
+  346 & NOI/Lawyer & Revenue & Lawyers^2 & NoFirmFE\_NoFE & 0.24 & 1317 & 1317 & 1815 \\ 
+  347 & NOI/Lawyer & Revenue & Lawyers^2 & Lawyers\_NoFE & 0.03 & 1329 & 1330 & 2314 \\ 
+  348 & NOI/Lawyer & Revenue & log(Lawyers) & FirmFE\_FE3 & 0.28 & 1314 & 1315 & 1710 \\ 
+  349 & NOI/Lawyer & Revenue & log(Lawyers) & FirmFE\_FE1 & 0.28 & 1314 & 1315 & 1715 \\ 
+  350 & NOI/Lawyer & Revenue & log(Lawyers) & FirmFE\_FEYear & 0.42 & 1304 & 1306 & 1389 \\ 
+  351 & NOI/Lawyer & Revenue & log(Lawyers) & FirmFE\_NoFE & 0.24 & 1317 & 1317 & 1811 \\ 
+  352 & NOI/Lawyer & Revenue & log(Lawyers) & NoFirmFE\_FE3 & 0.28 & 1314 & 1315 & 1714 \\ 
+  353 & NOI/Lawyer & Revenue & log(Lawyers) & NoFirmFE\_FE1 & 0.28 & 1314 & 1315 & 1712 \\ 
+  354 & NOI/Lawyer & Revenue & log(Lawyers) & NoFirmFE\_FEYear & 0.42 & 1304 & 1306 & 1388 \\ 
+  355 & NOI/Lawyer & Revenue & log(Lawyers) & NoFirmFE\_NoFE & 0.24 & 1317 & 1317 & 1814 \\ 
+  356 & NOI/Lawyer & Revenue & log(Lawyers) & Lawyers\_NoFE & 0.01 & 1330 & 1330 & 2341 \\ 
+  357 & NOI/Lawyer & Revenue & No & FirmFE\_FE3 & 0.28 & 1314 & 1315 & 1724 \\ 
+  358 & NOI/Lawyer & Revenue & No & FirmFE\_FE1 & 0.28 & 1314 & 1315 & 1725 \\ 
+  359 & NOI/Lawyer & Revenue & No & FirmFE\_FEYear & 0.4 & 1305 & 1308 & 1430 \\ 
+  360 & NOI/Lawyer & Revenue & No & FirmFE\_NoFE & 0.24 & 1317 & 1317 & 1818 \\ 
+   \hline
+\end{tabular}
+\end{table}
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+361 & NOI/Lawyer & Revenue & No & NoFirmFE\_FE3 & 0.28 & 1314 & 1315 & 1718 \\ 
+  362 & NOI/Lawyer & Revenue & No & NoFirmFE\_FE1 & 0.28 & 1314 & 1315 & 1722 \\ 
+  363 & NOI/Lawyer & Revenue & No & NoFirmFE\_FEYear & 0.4 & 1305 & 1308 & 1430 \\ 
+  364 & NOI/Lawyer & Revenue & No & NoFirmFE\_NoFE & 0.24 & 1317 & 1317 & 1821 \\ 
+  365 & NOI/Lawyer & Deals & Lawyers^2 & FirmFE\_FE3 & 0.2 & 1319 & 1320 & 1903 \\ 
+  366 & NOI/Lawyer & Deals & Lawyers^2 & FirmFE\_FE1 & 0.2 & 1320 & 1320 & 1905 \\ 
+  367 & NOI/Lawyer & Deals & Lawyers^2 & FirmFE\_FEYear & 0.31 & 1312 & 1315 & 1645 \\ 
+  368 & NOI/Lawyer & Deals & Lawyers^2 & FirmFE\_NoFE & 0.15 & 1323 & 1323 & 2036 \\ 
+  369 & NOI/Lawyer & Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.2 & 1319 & 1320 & 1904 \\ 
+  370 & NOI/Lawyer & Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.2 & 1320 & 1320 & 1907 \\ 
+  371 & NOI/Lawyer & Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.31 & 1312 & 1315 & 1642 \\ 
+  372 & NOI/Lawyer & Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.15 & 1323 & 1323 & 2037 \\ 
+  373 & NOI/Lawyer & Deals & Lawyers^2 & Lawyers\_NoFE & 0.03 & 1329 & 1330 & 2314 \\ 
+  374 & NOI/Lawyer & Deals & log(Lawyers) & FirmFE\_FE3 & 0.2 & 1319 & 1320 & 1899 \\ 
+  375 & NOI/Lawyer & Deals & log(Lawyers) & FirmFE\_FE1 & 0.2 & 1319 & 1320 & 1902 \\ 
+  376 & NOI/Lawyer & Deals & log(Lawyers) & FirmFE\_FEYear & 0.32 & 1312 & 1315 & 1632 \\ 
+  377 & NOI/Lawyer & Deals & log(Lawyers) & FirmFE\_NoFE & 0.15 & 1323 & 1323 & 2035 \\ 
+  378 & NOI/Lawyer & Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.2 & 1319 & 1320 & 1901 \\ 
+  379 & NOI/Lawyer & Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.2 & 1319 & 1320 & 1903 \\ 
+  380 & NOI/Lawyer & Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.32 & 1312 & 1315 & 1635 \\ 
+  381 & NOI/Lawyer & Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.15 & 1323 & 1323 & 2036 \\ 
+  382 & NOI/Lawyer & Deals & log(Lawyers) & Lawyers\_NoFE & 0.01 & 1330 & 1330 & 2340 \\ 
+  383 & NOI/Lawyer & Deals & No & FirmFE\_FE3 & 0.19 & 1320 & 1321 & 1939 \\ 
+  384 & NOI/Lawyer & Deals & No & FirmFE\_FE1 & 0.18 & 1320 & 1321 & 1941 \\ 
+  385 & NOI/Lawyer & Deals & No & FirmFE\_FEYear & 0.28 & 1314 & 1317 & 1713 \\ 
+  386 & NOI/Lawyer & Deals & No & FirmFE\_NoFE & 0.13 & 1324 & 1324 & 2069 \\ 
+  387 & NOI/Lawyer & Deals & No & NoFirmFE\_FE3 & 0.19 & 1320 & 1321 & 1938 \\ 
+  388 & NOI/Lawyer & Deals & No & NoFirmFE\_FE1 & 0.18 & 1320 & 1321 & 1941 \\ 
+  389 & NOI/Lawyer & Deals & No & NoFirmFE\_FEYear & 0.28 & 1314 & 1317 & 1714 \\ 
+  390 & NOI/Lawyer & Deals & No & NoFirmFE\_NoFE & 0.13 & 1324 & 1324 & 2070 \\ 
+  391 & NOI/Eq Partner & Revenue + Deals & Lawyers^2 & FirmFE\_FE3 & 0.45 & 1444 & 1445 & 23198 \\ 
+  392 & NOI/Eq Partner & Revenue + Deals & Lawyers^2 & FirmFE\_FE1 & 0.45 & 1444 & 1445 & 23311 \\ 
+  393 & NOI/Eq Partner & Revenue + Deals & Lawyers^2 & FirmFE\_FEYear & 0.54 & 1435 & 1438 & 19421 \\ 
+  394 & NOI/Eq Partner & Revenue + Deals & Lawyers^2 & FirmFE\_NoFE & 0.42 & 1446 & 1447 & 24275 \\ 
+  395 & NOI/Eq Partner & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.45 & 1444 & 1445 & 23206 \\ 
+  396 & NOI/Eq Partner & Revenue + Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.45 & 1444 & 1445 & 23221 \\ 
+  397 & NOI/Eq Partner & Revenue + Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.54 & 1435 & 1438 & 19378 \\ 
+  398 & NOI/Eq Partner & Revenue + Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.42 & 1446 & 1447 & 24201 \\ 
+  399 & NOI/Eq Partner & Revenue + Deals & Lawyers^2 & Lawyers\_NoFE & 0.12 & 1467 & 1467 & 36766 \\ 
+  400 & NOI/Eq Partner & Revenue + Deals & log(Lawyers) & FirmFE\_FE3 & 0.45 & 1444 & 1445 & 23347 \\ 
+   \hline
+\end{tabular}
+\end{table}
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+401 & NOI/Eq Partner & Revenue + Deals & log(Lawyers) & FirmFE\_FE1 & 0.44 & 1444 & 1445 & 23445 \\ 
+  402 & NOI/Eq Partner & Revenue + Deals & log(Lawyers) & FirmFE\_FEYear & 0.54 & 1435 & 1438 & 19444 \\ 
+  403 & NOI/Eq Partner & Revenue + Deals & log(Lawyers) & FirmFE\_NoFE & 0.42 & 1446 & 1447 & 24456 \\ 
+  404 & NOI/Eq Partner & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.45 & 1444 & 1445 & 23321 \\ 
+  405 & NOI/Eq Partner & Revenue + Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.44 & 1444 & 1445 & 23482 \\ 
+  406 & NOI/Eq Partner & Revenue + Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.54 & 1435 & 1438 & 19437 \\ 
+  407 & NOI/Eq Partner & Revenue + Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.42 & 1446 & 1447 & 24437 \\ 
+  408 & NOI/Eq Partner & Revenue + Deals & log(Lawyers) & Lawyers\_NoFE & 0.1 & 1468 & 1469 & 37752 \\ 
+  409 & NOI/Eq Partner & Revenue + Deals & No & FirmFE\_FE3 & 0.44 & 1444 & 1445 & 23553 \\ 
+  410 & NOI/Eq Partner & Revenue + Deals & No & FirmFE\_FE1 & 0.44 & 1445 & 1445 & 23578 \\ 
+  411 & NOI/Eq Partner & Revenue + Deals & No & FirmFE\_FEYear & 0.53 & 1436 & 1439 & 19807 \\ 
+  412 & NOI/Eq Partner & Revenue + Deals & No & FirmFE\_NoFE & 0.42 & 1447 & 1447 & 24551 \\ 
+  413 & NOI/Eq Partner & Revenue + Deals & No & NoFirmFE\_FE3 & 0.44 & 1444 & 1445 & 23523 \\ 
+  414 & NOI/Eq Partner & Revenue + Deals & No & NoFirmFE\_FE1 & 0.44 & 1445 & 1445 & 23527 \\ 
+  415 & NOI/Eq Partner & Revenue + Deals & No & NoFirmFE\_FEYear & 0.53 & 1436 & 1439 & 19780 \\ 
+  416 & NOI/Eq Partner & Revenue + Deals & No & NoFirmFE\_NoFE & 0.42 & 1447 & 1447 & 24523 \\ 
+  417 & NOI/Eq Partner & Revenue & Lawyers^2 & FirmFE\_FE3 & 0.44 & 1445 & 1445 & 23617 \\ 
+  418 & NOI/Eq Partner & Revenue & Lawyers^2 & FirmFE\_FE1 & 0.44 & 1445 & 1445 & 23695 \\ 
+  419 & NOI/Eq Partner & Revenue & Lawyers^2 & FirmFE\_FEYear & 0.53 & 1436 & 1438 & 19688 \\ 
+  420 & NOI/Eq Partner & Revenue & Lawyers^2 & FirmFE\_NoFE & 0.41 & 1447 & 1448 & 24743 \\ 
+  421 & NOI/Eq Partner & Revenue & Lawyers^2 & NoFirmFE\_FE3 & 0.44 & 1445 & 1445 & 23588 \\ 
+  422 & NOI/Eq Partner & Revenue & Lawyers^2 & NoFirmFE\_FE1 & 0.44 & 1445 & 1445 & 23715 \\ 
+  423 & NOI/Eq Partner & Revenue & Lawyers^2 & NoFirmFE\_FEYear & 0.53 & 1436 & 1438 & 19690 \\ 
+  424 & NOI/Eq Partner & Revenue & Lawyers^2 & NoFirmFE\_NoFE & 0.41 & 1447 & 1448 & 24703 \\ 
+  425 & NOI/Eq Partner & Revenue & Lawyers^2 & Lawyers\_NoFE & 0.12 & 1467 & 1467 & 36767 \\ 
+  426 & NOI/Eq Partner & Revenue & log(Lawyers) & FirmFE\_FE3 & 0.44 & 1445 & 1446 & 23877 \\ 
+  427 & NOI/Eq Partner & Revenue & log(Lawyers) & FirmFE\_FE1 & 0.43 & 1445 & 1446 & 23866 \\ 
+  428 & NOI/Eq Partner & Revenue & log(Lawyers) & FirmFE\_FEYear & 0.53 & 1436 & 1439 & 19816 \\ 
+  429 & NOI/Eq Partner & Revenue & log(Lawyers) & FirmFE\_NoFE & 0.41 & 1447 & 1448 & 24913 \\ 
+  430 & NOI/Eq Partner & Revenue & log(Lawyers) & NoFirmFE\_FE3 & 0.44 & 1445 & 1446 & 23820 \\ 
+  431 & NOI/Eq Partner & Revenue & log(Lawyers) & NoFirmFE\_FE1 & 0.43 & 1445 & 1446 & 23887 \\ 
+  432 & NOI/Eq Partner & Revenue & log(Lawyers) & NoFirmFE\_FEYear & 0.53 & 1436 & 1439 & 19759 \\ 
+  433 & NOI/Eq Partner & Revenue & log(Lawyers) & NoFirmFE\_NoFE & 0.41 & 1447 & 1448 & 24998 \\ 
+  434 & NOI/Eq Partner & Revenue & log(Lawyers) & Lawyers\_NoFE & 0.1 & 1468 & 1469 & 37745 \\ 
+  435 & NOI/Eq Partner & Revenue & No & FirmFE\_FE3 & 0.44 & 1445 & 1446 & 23820 \\ 
+  436 & NOI/Eq Partner & Revenue & No & FirmFE\_FE1 & 0.43 & 1445 & 1446 & 23846 \\ 
+  437 & NOI/Eq Partner & Revenue & No & FirmFE\_FEYear & 0.53 & 1436 & 1439 & 19882 \\ 
+  438 & NOI/Eq Partner & Revenue & No & FirmFE\_NoFE & 0.41 & 1447 & 1448 & 24934 \\ 
+  439 & NOI/Eq Partner & Revenue & No & NoFirmFE\_FE3 & 0.44 & 1445 & 1446 & 23851 \\ 
+  440 & NOI/Eq Partner & Revenue & No & NoFirmFE\_FE1 & 0.43 & 1445 & 1446 & 23880 \\ 
+   \hline
+\end{tabular}
+\end{table}
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Mon Jan 22 15:03:45 2018
+\begin{table}[H]
+\centering
+\begin{tabular}{rllllllll}
+  \hline
+ & Outcome & Dependent Variables & Lawyers & Fixed Effects & Adj R^2 & AIC / 10e+2 & BIC / 10e+2 & CV / 10e+7 \\ 
+  \hline
+441 & NOI/Eq Partner & Revenue & No & NoFirmFE\_FEYear & 0.53 & 1436 & 1439 & 19888 \\ 
+  442 & NOI/Eq Partner & Revenue & No & NoFirmFE\_NoFE & 0.41 & 1447 & 1448 & 25017 \\ 
+  443 & NOI/Eq Partner & Deals & Lawyers^2 & FirmFE\_FE3 & 0.37 & 1450 & 1451 & 26396 \\ 
+  444 & NOI/Eq Partner & Deals & Lawyers^2 & FirmFE\_FE1 & 0.37 & 1451 & 1451 & 26553 \\ 
+  445 & NOI/Eq Partner & Deals & Lawyers^2 & FirmFE\_FEYear & 0.45 & 1444 & 1446 & 23189 \\ 
+  446 & NOI/Eq Partner & Deals & Lawyers^2 & FirmFE\_NoFE & 0.33 & 1453 & 1454 & 28007 \\ 
+  447 & NOI/Eq Partner & Deals & Lawyers^2 & NoFirmFE\_FE3 & 0.37 & 1450 & 1451 & 26406 \\ 
+  448 & NOI/Eq Partner & Deals & Lawyers^2 & NoFirmFE\_FE1 & 0.37 & 1451 & 1451 & 26550 \\ 
+  449 & NOI/Eq Partner & Deals & Lawyers^2 & NoFirmFE\_FEYear & 0.45 & 1444 & 1446 & 23151 \\ 
+  450 & NOI/Eq Partner & Deals & Lawyers^2 & NoFirmFE\_NoFE & 0.33 & 1453 & 1454 & 27987 \\ 
+  451 & NOI/Eq Partner & Deals & Lawyers^2 & Lawyers\_NoFE & 0.12 & 1467 & 1467 & 36774 \\ 
+  452 & NOI/Eq Partner & Deals & log(Lawyers) & FirmFE\_FE3 & 0.37 & 1451 & 1451 & 26505 \\ 
+  453 & NOI/Eq Partner & Deals & log(Lawyers) & FirmFE\_FE1 & 0.37 & 1451 & 1451 & 26685 \\ 
+  454 & NOI/Eq Partner & Deals & log(Lawyers) & FirmFE\_FEYear & 0.45 & 1444 & 1447 & 23216 \\ 
+  455 & NOI/Eq Partner & Deals & log(Lawyers) & FirmFE\_NoFE & 0.33 & 1454 & 1454 & 28124 \\ 
+  456 & NOI/Eq Partner & Deals & log(Lawyers) & NoFirmFE\_FE3 & 0.37 & 1451 & 1451 & 26515 \\ 
+  457 & NOI/Eq Partner & Deals & log(Lawyers) & NoFirmFE\_FE1 & 0.37 & 1451 & 1451 & 26644 \\ 
+  458 & NOI/Eq Partner & Deals & log(Lawyers) & NoFirmFE\_FEYear & 0.45 & 1444 & 1447 & 23182 \\ 
+  459 & NOI/Eq Partner & Deals & log(Lawyers) & NoFirmFE\_NoFE & 0.33 & 1454 & 1454 & 28141 \\ 
+  460 & NOI/Eq Partner & Deals & log(Lawyers) & Lawyers\_NoFE & 0.1 & 1468 & 1469 & 37749 \\ 
+  461 & NOI/Eq Partner & Deals & No & FirmFE\_FE3 & 0.36 & 1451 & 1452 & 26836 \\ 
+  462 & NOI/Eq Partner & Deals & No & FirmFE\_FE1 & 0.36 & 1451 & 1452 & 26973 \\ 
+  463 & NOI/Eq Partner & Deals & No & FirmFE\_FEYear & 0.43 & 1445 & 1448 & 23908 \\ 
+  464 & NOI/Eq Partner & Deals & No & FirmFE\_NoFE & 0.32 & 1454 & 1454 & 28462 \\ 
+  465 & NOI/Eq Partner & Deals & No & NoFirmFE\_FE3 & 0.36 & 1451 & 1452 & 26860 \\ 
+  466 & NOI/Eq Partner & Deals & No & NoFirmFE\_FE1 & 0.36 & 1451 & 1452 & 26964 \\ 
+  467 & NOI/Eq Partner & Deals & No & NoFirmFE\_FEYear & 0.43 & 1445 & 1448 & 23887 \\ 
+  468 & NOI/Eq Partner & Deals & No & NoFirmFE\_NoFE & 0.32 & 1454 & 1454 & 28488 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+\newpage
 
 {\large \textbf{Model Selection} }
 \begin{figure}[H]
@@ -2623,9 +3217,7 @@ Lawyers &  &  &  &  &  &  &  &  & \\
 \end{figure}
 We have also generated this analysis when breaking up the data into 3 or more tiers, but they do not appear to show the differences as clearly as the two-tier models. We conjecture that if as we increase the number of tiers by which we factorize the data, there is a higher proportion of zeros in the resulting lowest tier. This causes hightened sensitivity in the signal of the data and deems the plot uninterpretable.
 \newpage
-
 {\large \textbf{More Plots} }
-
 \begin{figure}[H]\centering
 \includegraphics[width=0.85\textwidth]{../IndivTexOutput/MnADifferences.jpg}\end{figure}
 

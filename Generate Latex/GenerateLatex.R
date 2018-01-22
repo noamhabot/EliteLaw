@@ -303,12 +303,116 @@ SaveCorrelationsByRankPlots <- function(df, correlRanks) {
     graphName <- paste("IndivTexOutput/MnAGDP-", i, ".jpg", sep="")
     ggsave(graphName, p)
   }
-  
-  
-  
 }
 
 
+printHorizontally <- function(mainDF) {
+  mainDFH <- t(mainDF)
+  numPerLine <- 6
+  for (i in 1:round(ncol(mainDFH)/numPerLine)) {
+    istr = as.character(i)
+    if (i < 10) {
+      istr = paste("0",i,sep="")
+    }
+    end <- i*numPerLine
+    if (end > ncol(mainDFH)) {
+      end <- ncol(mainDFH)
+    }
+    writeDF <- mainDF[,(((i-1)*numPerLine)+1):end]
+    print(xtable(mainDFH[,(((i-1)*numPerLine)+1):end], digits=3), 
+          file=paste("IndivTexOutput/performance",istr,".tex",sep=""),
+          sanitize.text.function=function(x){x})
+  }
+}
+
+printVertically <- function(mainDF) {
+  numPerLine <- 40
+  for (i in 1:ceiling(nrow(mainDF)/numPerLine)) {
+    istr = as.character(i)
+    if (i < 10) {
+      istr = paste("0",i,sep="")
+    }
+    end <- i*numPerLine
+    if (end > nrow(mainDF)) {
+      end <- nrow(mainDF)
+    }
+    writeDF <- mainDF[(((i-1)*numPerLine)+1):end,]
+    print(xtable(writeDF, digits=3), 
+          file=paste("IndivTexOutput/performance",istr,".tex",sep=""),
+          sanitize.text.function=function(x){x})
+  }
+}
+
+
+
+# Generate the Performance Graphs
+GeneratePerformanceTable <- function(resultsPerformance) {
+  resultsPerformance1 <- t(resultsPerformance)
+  
+  outcomes <- c("GrossRev_NoRatio", "GrossRev_PerLawyer", "GrossRev.eqPart_NoRatio", 
+                "NOI_NoRatio", "NOI_PerLawyer", "NOI.eqPart_NoRatio")
+  types <- c("Both", "Revenue", "Deals")
+  lawyers <- c("WithLawyers2", "WithLawyersLog", "WithoutLawyers")
+  
+  mainDF <- data.frame(matrix(ncol=8, nrow=0))
+  
+  for (i in 1:length(outcomes)) {
+    outcome <- outcomes[i]
+    subset <- row.names(resultsPerformance1)[grepl(outcome, row.names(resultsPerformance1))]
+    
+    thisDF <- data.frame()
+    
+    for (type in types) {
+      subset1 <- subset[grepl(type, subset)]
+      
+      for (lawyer in lawyers) {
+        subset2 <- subset1[grepl(lawyer, subset1)]
+        
+        fixedEffects <- c()
+        splitted <- strsplit(subset2, '_')
+        for (line in splitted) {
+          fixedEffects <- c(fixedEffects, paste(line[5], line[6], sep="\\_"))
+        }
+        
+        mainDF <- rbind(mainDF,cbind(rep(outcome,length(subset2)), rep(type,length(subset2)), 
+                                     rep(lawyer,length(subset2)), fixedEffects, resultsPerformance1[subset2,]))
+        
+      }
+    }
+  }
+  
+  row.names(mainDF) <- 1:nrow(mainDF)
+  names(mainDF) <- c("Outcome", "Dependent Variables", "Lawyers", "Fixed Effects", "Adj R^2", names(mainDF)[6:8])
+  
+  mainDF$Outcome <- gsub("_NoRatio", "", mainDF$Outcome)
+  mainDF$Outcome <- gsub("GrossRev", "Gross Rev", mainDF$Outcome)
+  mainDF$Outcome <- gsub("_PerLawyer", "/Lawyer", mainDF$Outcome)
+  mainDF$Outcome <- gsub(".eqPart", "/Eq Partner", mainDF$Outcome)
+  
+  mainDF$`Dependent Variables` <- gsub("Both", "Revenue + Deals", mainDF$`Dependent Variables`)
+  
+  mainDF$Lawyers <- gsub("WithLawyers2", "Lawyers^2", mainDF$Lawyers)
+  mainDF$Lawyers <- gsub("WithLawyersLog", "log(Lawyers)", mainDF$Lawyers)
+  mainDF$Lawyers <- gsub("WithoutLawyers", "No", mainDF$Lawyers)
+  
+  #printHorizontally(mainDF)
+  printVertically(mainDF)
+  
+  
+  
+  # plot the scores by order with decreasing R^2
+  orderedDF <- t(mainDF)
+  orderedDF <- mainDF[order(as.numeric(mainDF[,8]), decreasing=FALSE),]
+  colnames(orderedDF) <- c("Adj.R2", "AIC", "BIC", "CV")
+  orderedDF <- data.frame(apply(orderedDF, 2, as.numeric))
+  orderedDF <- melt(orderedDF, id="Adj.R2")
+  ggplot(data=orderedDF, aes(x=Adj.R2, y=value)) + geom_line(data=orderedDF,aes(color=variable, alpha=0.2)) + 
+    ggtitle(("AIC, BIC, CV vs. Adj.R^2"))
+  
+  
+  #return(mainDF)
+}
+#GeneratePerformanceTable(resultsPerformance)
 
 
 

@@ -13,7 +13,7 @@ library(multiwayvcov)
 
 
 # Load dataframe
-setwd("~/Google Drive/Stanford Law Project/")
+setwd("~/Google Drive/EliteLaw/")
 load('Data/EliteLawDf2016.RData')
 #load('Data/EliteLawDf.RData')
 source('Generate Latex/CV.R')

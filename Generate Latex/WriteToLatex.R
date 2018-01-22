@@ -8,7 +8,7 @@ library(reshape)
 library(GGally)
 
 
-setwd("~/Google Drive/Stanford Law Project/Generate Latex/")
+setwd("~/Google Drive/EliteLaw/Generate Latex/")
 
 # Open files
 load('RegressionsResults.RData')
@@ -53,7 +53,8 @@ SaveCorrelationsByRankPlots(df, correlRanks)
 
 # Build the appropriate dataframes by slicing from the correct columns 
 #Performance.Rev.Lawyer.With.Lawyers = resultsPerformance[, 1:9] # unused
-resultsPerformance <- t(resultsPerformance)
+# Generate the Performance Table
+GeneratePerformanceTable(resultsPerformance)
 
 
 # Set the possible Configurations
@@ -174,6 +175,10 @@ for (i in 1:length(tables)) {
   fileName <- paste("IndivTexOutput/regressions-table",istr,".tex",sep="")
   print(tables[[i]], file=fileName, sanitize.text.function=function(x){x})
 }
+
+
+
+
 
 
 

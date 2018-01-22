@@ -6,8 +6,7 @@
 {\author Noam Habot}}\margl1440\margr1440\vieww10800\viewh8400\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
-\f0\fs24 \cf0 \strike \strikec0 Cluster them so they're in the same order/grouping throughout all the slides\
-including in correlation tables and graphs and plots\strike0\striked0 \
+\f0\fs24 \cf0 \
 \
 PUT THEM IN JOURNAL STYLE\
 units need to be consistent and show what they are\
@@ -20,6 +19,64 @@ IPORevenue - thousands / millions\
 M&A Count\
 \
 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b \cf0 \
+\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b0 \cf0  
+\b \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\fs40 \cf0 BREAKPOINT ANALYSIS
+\fs24 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b0 \cf0 We will do the breakpoint analysis ONLY ON 1 SPECIFICATION\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b \cf0 44 - Gross Revenue on Revenue + NumDeals
+\b0 \
+if need to narrow down further within one of the 9, tell them\
+\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b\fs38 \cf0 Model Averaging
+\b0\fs24 \
+apply model averaging algorithm on all of the models\
+generates a new model, and maybe do the breakpoint analysis on top of it\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "https://www.rdocumentation.org/packages/MuMIn/versions/1.40.0/topics/model.avg"}}{\fldrslt \cf0 https://www.rdocumentation.org/packages/MuMIn/versions/1.40.0/topics/model.avg}}\
+\
+\
+put in the paper\
+regression page 44\
+put all the other regression in a statistical appendix online\
+report the model averaging result\
+give the breakpoint analysis for 44 and for the model averaging result\
+\
+\
+\
+\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \strike \strikec0 \
+\strike0\striked0 \
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\strike \strikec0 Cluster them so they're in the same order/grouping throughout all the slides\
+including in correlation tables and graphs and plots\strike0\striked0 \
 \
 \
 \strike \strikec0 use the journal format for correlations, and use significant figures same as journal style (3 digits)\
@@ -66,18 +123,23 @@ check in journal if in parenthesis we put the
 \strike \strikec0 Journal:\
 + p < 0.10\
 * p < 0.05\
-** p < 0.01\strike0\striked0 \
+** p < 0.01\
+in parenthesis = p-values, with 3 decimal places\
+3 decimal places for the coefficients\strike0\striked0 \
 \
 \strike \strikec0 Journal puts p-values in parenthesis underneath!!!\strike0\striked0 \
 \
-ADD NEW CHART\
+\strike \strikec0 ADD NEW CHART\
 with the R^2, and AIC, BIC\
 and give them each regression a unique number\
 make sure it's in the order we want\
+\strike0\striked0 summary of R^2, results.  numbered 1-54. with a column\
+put check mark yes or no for the different types of regressions \
+columns will be lawyers, deals, etc. and within the chart \
 \
 \
 \
-24\
+\strike \strikec0 24\
 25\
 43\
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
@@ -91,52 +153,11 @@ make sure it's in the order we want\
 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
-\b0 \cf0  
-\b \
-\
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
-
-\fs40 \cf0 BREAKPOINT ANALYSIS
-\fs24 \
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
-
-\b0 \cf0 We will do the breakpoint analysis ONLY ON 1 SPECIFICATION\
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
-
-\b \cf0 44 - Gross Revenue on Revenue + NumDeals
-\b0 \
-if need to narrow down further within one of the 9, tell them\
+\b0 \cf0 \strike0\striked0 \
 \
 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
-\b\fs38 \cf0 Model Averaging
-\b0\fs24 \
-apply model averaging algorithm on all of the models\
-generates a new model, and maybe do the breakpoint analysis on top of it\
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
-{\field{\*\fldinst{HYPERLINK "https://www.rdocumentation.org/packages/MuMIn/versions/1.40.0/topics/model.avg"}}{\fldrslt \cf0 https://www.rdocumentation.org/packages/MuMIn/versions/1.40.0/topics/model.avg}}\
-\
-\
-put in the paper\
-regression page 44\
-put all the other regression in a statistical appendix online\
-report the model averaging result\
-give the breakpoint analysis for 44 and for the model averaging result\
-\
-\
-summary of R^2, results.  numbered 1-54. with a column\
-put check mark yes or no for the different types of regressions \
-columns will be lawyers, deals, etc. and within the chart \
-\
-\
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
-\cf0 \strike \strikec0 \
-\strike0\striked0 \
-\
-in parenthesis = p-values, with 3 decimal places\
-3 decimal places for the coefficients\
-\
-\
+\b \cf0 \strike \strikec0 \
 \
 }

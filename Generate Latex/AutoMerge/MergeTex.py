@@ -1,6 +1,6 @@
 import glob, os, re, subprocess
 
-fileText = "\\documentclass{article}\n\\usepackage{subfig}\n\\usepackage{graphicx}\n\\usepackage{multirow}\n\\usepackage{float}\n\\usepackage[landscape, margin=1in]{geometry}\n\\begin{document}"
+fileText = "\\documentclass{article}\n\\usepackage{subfig}\n\\usepackage{graphicx}\n\\usepackage{multirow}\n\\usepackage{float}\n\\usepackage[landscape, margin=1in, tmargin=0.5in, bmargin=0.5in]{geometry}\n\\begin{document}"
 fileText += "\n\\begin{center}{\LARGE Elite Law Analysis}\n\\\\\n\\begin{tabular}{rl}\\\\Professor Joseph Grundfest, Professor Laurie Hodrick, Noam Habot \\\\January 2018\\end{tabular}\\end{center}"
 
 
@@ -87,11 +87,11 @@ def addMethods(categoryName):
 def addCategory(category, categoryName):
     global filesWritten
 
-    thisText = "\n{\\large \\textbf{"+categoryName+"} }\n"
+    thisText = "{\\large \\textbf{"+categoryName+"} }"
     for f in sorted(glob.glob(os.path.join(os.getcwd(), "../IndivTexOutput/*"))):
         base = os.path.basename(f)
-        print base
         if category in base and base not in filesWritten:
+            print base
             filesWritten.append(base)
             if ".tex" in base:
 
@@ -159,12 +159,14 @@ fileText += addCategory("MnAGDP", "Correlations with AggM\&A and GDP")
 # # now add all the regression files:
 fileText += addCategory("regressions", "Regressions")
 
+# # now add all the regression Performance files:
+fileText += addCategory("performance", "Regression Performance")
+
 # now add a square of GrossRev, NOI x lasso, lm
 fileText += addMethods("Model Selection")
 
 # now write the rest of the files that we might have forgotten:
 fileText += addCategory("", "More Plots")
-
 
 
 
