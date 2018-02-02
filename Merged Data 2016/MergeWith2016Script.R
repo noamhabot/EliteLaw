@@ -2,7 +2,7 @@
 rm(list = ls())
 
 # Set working directory
-setwd("~/Google Drive/Stanford Law Project/Merged Data 2016/")
+setwd("~/Google Drive/EliteLaw/Merged Data 2016/")
 
 library("openxlsx")
 library("dplyr")
@@ -198,13 +198,13 @@ col_idx <- c(col_idx, grep("Firm", names(toWrite)))
 col_idx <- c(col_idx, grep("GrossRev", names(toWrite)))
 col_idx <- c(col_idx, grep("NOI", names(toWrite)))
 col_idx <- c(col_idx, grep("MnA", names(toWrite)))
-col_idx <- c(col_idx, grep("IPO", names(toWrite)))
 col_idx <- c(col_idx, grep("Equity", names(toWrite)))
+col_idx <- c(col_idx, grep("IPO", names(toWrite)))
 toWrite <- toWrite[, c((1:ncol(toWrite))[-col_idx], col_idx)]
 ##########################################################################################
 
 df <- toWrite
-setwd("~/Google Drive/Stanford Law Project/Data/")
+setwd("~/Google Drive/EliteLaw/Data/")
 save(df, file="EliteLawDf2016.RData")
 
 # write it to a new excel file

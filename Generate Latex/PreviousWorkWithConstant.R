@@ -9,6 +9,7 @@ library(plm)
 library(lmtest)
 library(sandwich)
 library(multiwayvcov)
+library(car)
 
 
 
@@ -38,7 +39,7 @@ outputDenominator = "NoRatio"
 firmFixedEffect = "NoFirm"
 
 # Get the main variables
-commonCovariates = df %>% select(Lawyers, Lawyers2, Leverage, FirmName, MnARevenue, EquityRevenue, IPORevenue, MnANumOfDeals, IPOIssues, EquityIssues)
+commonCovariates = df %>% select(Lawyers, Lawyers2, Leverage, FirmName, MnARevenue, EquityRevenue, IPORevenue, MnANumOfDeals, EquityIssues, IPOIssues)
 # hack to change Lawyers^2 to log(lawyers)
 commonCovariates = commonCovariates %>% mutate(LawyersLog = log(Lawyers), MnAIssues=MnANumOfDeals) %>% select(-MnANumOfDeals)
 commonCovariates <- commonCovariates[, c(1:2, 10, 3:9, 11)]
@@ -53,8 +54,10 @@ firms = data.frame(FirmID = as.character(df$FirmID))
 
 # Prepare the table for the results
 #covariates = c("Lawyers", "log(Lawyers)", "AggMnA", "AggEquity", "AggIPO", "MnARevenue", "EquityRevenue", "IPORevenue", "Leverage", "(Intercept)")
-covariates = c("Lawyers", "Lawyers2", "LawyersLog", "Leverage", "(Intercept)",  "MnARevenue", "EquityRevenue", "IPORevenue", "IPOIssues", "EquityIssues", "MnAIssues")
-modelAcessment = c('Adj_R_2', 'AIC / 10e+2', 'BIC / 10e+2', 'CV / 10e+7')
+covariates = c("(Intercept)", "Lawyers", "Lawyers2", "LawyersLog", "Leverage",  
+               "MnARevenue", "EquityRevenue", "IPORevenue", 
+               "MnAIssues", "EquityIssues", "IPOIssues")
+modelAcessment = c('Adj_R_2', 'AIC / 10e+2', 'BIC / 10e+2', 'CV / 10e+7', 'Num Params')
 
 resultsCoeffs = data.frame(row.names = c(covariates, 'Observations', 'R2', 'Adj R2', 'AIC', 'BIC'))
 resultsTValues = data.frame(row.names = covariates)
@@ -75,14 +78,15 @@ nCV = 10
 
 # For debugging only--------------------
 dealsAndOrRevenue = dealsAndOrRevenues[1]
-modelOutput = modelOutputs[1]
+modelOutput = modelOutputs[3]
 outputDenominator = outputDenominators[1]
 firmFixedEffect = firmFixedEffects[1]
-fixedEffect = fixedEffects[1]
+fixedEffect = fixedEffects[3]
 excludeLawyer = excludeLawyers[1]
+counter <- 1
 # --------------------------------------
 
-
+counter <- 1
 for(modelOutput in modelOutputs) {
   for (outputDenominator in outputDenominators){
     for(dealsAndOrRevenue in dealsAndOrRevenues){
@@ -96,7 +100,7 @@ for(modelOutput in modelOutputs) {
           
             # Set current configuration
             resultConfig = paste(modelOutput, outputDenominator, dealsAndOrRevenue, excludeLawyer, firmFixedEffect, fixedEffect, sep = '_')
-            print(resultConfig)
+            print(paste(counter,modelOutput, outputDenominator, dealsAndOrRevenue, excludeLawyer, firmFixedEffect, fixedEffect, sep = '_'))
             
             
             
@@ -125,7 +129,7 @@ for(modelOutput in modelOutputs) {
               
               # Skip if we are regressing only lawyers
               if(firmFixedEffect ==  "Lawyers"){ next }
-              currDf = cbind(currDf, AggMnA = df$AggMnA, AggIPO = df$AggIPO, AggEquity = df$AggEquity)
+              currDf = cbind(currDf, AggMnA = df$AggMnA, AggEquity = df$AggEquity, AggIPO = df$AggIPO)
             } else if(fixedEffect == "FE1"){
               
               # Skip if we are regressing only lawyers
@@ -145,9 +149,11 @@ for(modelOutput in modelOutputs) {
             if(excludeLawyer == "WithoutLawyers"){
               currDf = currDf %>% select(-Lawyers, -Lawyers2, -LawyersLog)
             } else if (excludeLawyer == "WithLawyers2"){
-              currDf = currDf %>% select(-LawyersLog)
+              #currDf = currDf %>% select(-LawyersLog)
+              currDf = currDf %>% select(-LawyersLog, -Lawyers)
             } else if (excludeLawyer == "WithLawyersLog"){
-              currDf = currDf %>% select(-Lawyers2)
+              #currDf = currDf %>% select(-Lawyers2)
+              currDf = currDf %>% select(-Lawyers2, -Lawyers)
             }
             
             
@@ -166,9 +172,11 @@ for(modelOutput in modelOutputs) {
               if(excludeLawyer == "WithoutLawyers"){ 
                 next 
               } else if (excludeLawyer == "WithLawyers2") {
-                currDf = currDf %>% select(Output, Lawyers, Lawyers2)
+                #currDf = currDf %>% select(Output, Lawyers, Lawyers2)
+                currDf = currDf %>% select(Output, Lawyers2)
               } else if (excludeLawyer == "WithLawyersLog") {
-                currDf = currDf %>% select(Output, Lawyers, LawyersLog)
+                #currDf = currDf %>% select(Output, Lawyers, LawyersLog)
+                currDf = currDf %>% select(Output, LawyersLog)
               }
               
             }
@@ -185,8 +193,9 @@ for(modelOutput in modelOutputs) {
             # Run the linear regression
             currModel = lm(Output ~., data = currDf[ , !(names(currDf) %in% c("FirmName"))])
             
-            
-            
+            vif(currModel)
+
+
             # Compute the coefficients, TValues and performace metrics
             coeffs = summary(currModel)$coefficients[, 1]
             r2 = round(summary(currModel)$r.squared, 2)
@@ -195,10 +204,10 @@ for(modelOutput in modelOutputs) {
             bic = round(BIC(currModel)/100)
             #print(resettest(currModel)$p.value)
             if(outputDenominator == "NoRatio" && modelOutput != "NOI.eqPart"){ denom = 10^13} else{ denom = denom = 10^7}
-            
+
             cv = round(CrossValidationError(currDf, 20)/denom)
-            
-            
+
+
             # Picking the right covariance matrix to adjust for heteroskedasticity
             if(firmFixedEffect == "FirmFE"){
               vcovMatrix = cluster.vcov(currModel, currDf[, "FirmName"])
@@ -207,36 +216,36 @@ for(modelOutput in modelOutputs) {
             } else {
               vcovMatrix = vcovHC(currModel, type = "HC0")
             }
-            
+
             adjustedModel = coeftest(currModel, vcovMatrix)
             adjPValues = adjustedModel[, 4]
             adjTValues = adjustedModel[, 3]
-            
-            
-            
+
+
+
             # Update coefficients/TValues results
             resultsPValues = cbind(resultsPValues, NA)
             names(resultsPValues)[length(resultsPValues)] = resultConfig
-            
+
             resultsTValues = cbind(resultsTValues, NA)
             names(resultsTValues)[length(resultsTValues)] = resultConfig
-            
+
             resultsCoeffs = cbind(resultsCoeffs, NA)
             names(resultsCoeffs)[length(resultsCoeffs)] = resultConfig
-            
+
             # Update only if the covariate was tested in the current configuration
             for(covariate in covariates){
               if(covariate %in% row.names(as.data.frame(adjTValues))){
                 #TValues
                 resultsTValues[covariate, resultConfig] = round(adjTValues[covariate], digits = 2)
                 resultsPValues[covariate, resultConfig] = round(adjPValues[covariate], digits = 3)
-                
+
                 #Coefficients
                 if(covariate == "Leverage" || covariate == "Lawyers" || covariate == "(Intercept)"){
-                  if(outputDenominator == "NoRatio"){ 
+                  if(outputDenominator == "NoRatio"){
                     denom = 1000000
                     numDigits = 1
-                  } else{ 
+                  } else{
                     denom = 1000
                     numDigits = 2
                   }
@@ -247,8 +256,8 @@ for(modelOutput in modelOutputs) {
                 }
               }
             }
-            
-            
+
+
             resultsCoeffs['Observations', resultConfig] = nrow(currDf)
             resultsCoeffs['R2', resultConfig] = r2
             resultsCoeffs['Adj R2', resultConfig] = adjR2
@@ -257,9 +266,14 @@ for(modelOutput in modelOutputs) {
             
             
             
+
+            numParams = length(coef(currModel))-1
+            
             # Update performance tables
-            resultsPerformance = cbind(resultsPerformance, c(adjR2, aic, bic, cv))
+            resultsPerformance = cbind(resultsPerformance, c(adjR2, aic, bic, cv, numParams))
             names(resultsPerformance)[length(resultsPerformance)] = resultConfig
+            
+            counter <- counter + 1
           }
         } 
       }
@@ -267,10 +281,12 @@ for(modelOutput in modelOutputs) {
   }
 }
 
+row.names(resultsCoeffs) <- gsub("\\(Intercept\\)", "Intercept", row.names(resultsCoeffs))
 
 
 # Save regressions results
 save(resultsCoeffs, resultsTValues, resultsPValues, resultsPerformance, file = 'Generate Latex/RegressionsResults.RData')
+
 
 
 

@@ -162,6 +162,12 @@ fileText += addCategory("regressions", "Regressions")
 # # now add all the regression Performance files:
 fileText += addCategory("performance", "Regression Performance")
 
+# # now add all the files for model averaging:
+fileText += addCategory("ModelAveraging", "Model Averaging")
+
+# now write the rest of the files that we might have forgotten:
+fileText += addCategory("Breakpoints", "Breakpoint Analysis")
+
 # now add a square of GrossRev, NOI x lasso, lm
 fileText += addMethods("Model Selection")
 

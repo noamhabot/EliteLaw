@@ -95,9 +95,8 @@ plotOverYears <- function(wholeResults, numTiers, method, outputText) {
   p <- ggplot(data=dfForPlotting, aes(x=YearFrom)) +
     geom_line(aes(y = value, colour = variable, group=variable)) +
     scale_color_manual(labels = paste("Tier", 1:numTiers, "MnA Coefficient"), values = 1:numTiers) +
-    labs(title = titleText, x = "Years", y = "M&A Coefficient", color = "Legend",
+    labs(title = titleText, x = "Years", y = "M&A Revenue Standardized Coefficient", color = "Legend",
          caption=captionText) 
   #geom_vline(data=vertLinesDF, aes(xintercept=xint, color=cols), linetype="dashed")
-  show(p)
   return(p)
 }

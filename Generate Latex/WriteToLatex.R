@@ -6,6 +6,7 @@ library(dplyr)
 library(ggplot2)
 library(reshape)
 library(GGally)
+library(MuMIn)
 
 
 setwd("~/Google Drive/EliteLaw/Generate Latex/")
@@ -14,15 +15,16 @@ setwd("~/Google Drive/EliteLaw/Generate Latex/")
 load('RegressionsResults.RData')
 load('../Data/EliteLawDf2016.RData')
 source('GenerateLatex.R')
+source('../Analysis/ModelAveraging.R')
 
 
 
 
 ###################### Summary Statistics ######################
 summaryTables <- GenerateSummaryStatistics(df)
-for (i in 1:length(summaryTables)) {
-  print(xtable(summaryTables[[i]]), file=paste("IndivTexOutput/summary",i,".tex",sep=""), sanitize.text.function=function(x){x})
-}
+alignment <- paste(c("l",rep("r",ncol(summaryTables))), collapse="")
+print(xtable(summaryTables, align=alignment), file="IndivTexOutput/summary.tex", 
+      sanitize.text.function=function(x){x})
 ##################################################################
 
 
@@ -33,8 +35,9 @@ for (i in 1:length(summaryTables)) {
 corDF <- GenerateCorrelations(df)
 corDF <- round(cor(corDF),3) # the journal uses 3 significant figures
 
-print(xtable(corDF[,1:5], digits=3), file="IndivTexOutput/corrTable1.tex")
-print(xtable(corDF[,6:ncol(corDF)], digits=3), file="IndivTexOutput/corrTable2.tex")
+print(xtable(corDF[,1:6], digits=3), file="IndivTexOutput/corrTable1.tex")
+print(xtable(corDF[,7:10], digits=3), file="IndivTexOutput/corrTable2.tex")
+print(xtable(corDF[,11:ncol(corDF)], digits=3), file="IndivTexOutput/corrTable3.tex")
 
 
 # prints the correlation table by rank
@@ -178,8 +181,8 @@ for (i in 1:length(tables)) {
 
 
 
-
-
+# save the model averaging to the tables
+#saveModelAveraging(df)
 
 
 

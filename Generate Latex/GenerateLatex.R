@@ -83,7 +83,11 @@ GenerateLatexInference = function(dfCoeff, dfTValue, dfPValue){
     for(j in 1:ncol(output)){
       # Add parenthesis
       if(is.na(dfPValue[i, j])==FALSE){
-        output[currRow, j] = paste("(", toString(output[currRow, j]), ")", sep="")
+        if (output[currRow, j] == 0) {
+          output[currRow, j] = "(0.000)"
+        } else {
+          output[currRow, j] = paste("(", toString(output[currRow, j]), ")", sep="")
+        }
       } else {
         output[currRow, j] = ""
       }
@@ -153,12 +157,33 @@ GenerateSummaryStatistics <- function(df) {
   names(answer) <- gsub("Agg", "Agg ", names(answer))
   names(answer) <- gsub("Rank", " Rank", names(answer))
   names(answer) <- gsub("Revenue", "Rev", names(answer))
-  names(answer) <- gsub("Issues", "Count", names(answer))
-  names(answer) <- gsub("NumOfDeals", "Count", names(answer))
+  #names(answer) <- gsub("Issues", "Count", names(answer))
+  names(answer) <- gsub("NumOfDeals", "Issues", names(answer))
+  
+  # add units in parenthesis
+  names(answer) <- gsub("Leverage", "Leverage (ratio)", names(answer))
+  names(answer) <- gsub("^Gross Rev$", "Gross Rev (US\\\\$)", names(answer))
+  names(answer) <- gsub("^Gross Rev/Lawyer$", "Gross Rev/Lawyer (US\\\\$/pers.)", names(answer))
+  names(answer) <- gsub("^Gross Rev/Eq Partner$", "Gross Rev/Eq Partner (US\\\\$/pers.)", names(answer))
+  names(answer) <- gsub("^NOI$", "NOI (US\\\\$)", names(answer))
+  names(answer) <- gsub("^NOI/Lawyer$", "NOI/Lawyer (US\\\\$/pers.)", names(answer))
+  names(answer) <- gsub("^NOI/Eq Partner$", "NOI/Eq Partner (US\\\\$/pers.)", names(answer))
+  
+  names(answer) <- gsub("^MnA Rev$", "MnA Rev (US\\\\$Millions)", names(answer))
+  names(answer) <- gsub("^Agg MnA $", "Agg MnA (US\\\\$Millions)", names(answer))
+  names(answer) <- gsub("^Equity Rev$", "Equity Rev (US\\\\$Millions)", names(answer))
+  names(answer) <- gsub("^Agg Equity $", "Agg Equity (US\\\\$Millions)", names(answer))
+  names(answer) <- gsub("^IPO Rev$", "IPO Rev (US\\\\$Millions)", names(answer))
+  names(answer) <- gsub("^Agg IPO $", "Agg IPO (US\\\\$Millions)", names(answer))
+
+  
   
   row.names(answer) <- c("Min", "1st Q", "Median", "Mean", "3rd Q", "Max")
-  return(list(answer[1:6], answer[7:12], answer[13:19], answer[20:27]))
+  
+  #return(list(t(answer)))
+  return(t(answer))
 }
+#View(GenerateSummaryStatistics(df))
 
 
 
@@ -166,10 +191,12 @@ GenerateCorrelations <- function(df) {
   numeric <- df[, sapply(df, is.numeric)]
   #numeric$RevPLawyer <- numeric$GrossRevenue/numeric$Lawyers
   #numeric$NOIPLawyer <- numeric$NOI/numeric$Lawyers
-  corDF <- numeric %>% select(Lawyers, Leverage, GrossRev, GrossRev.Lawyer, GrossRev.eqPart,
+  corDF <- numeric %>% select(GrossRev, GrossRev.Lawyer, GrossRev.eqPart,
                               NOI, NOI.Lawyer, NOI.eqPart,
-                              MnARevenue, IPORevenue, EquityRevenue)
-  print(names(corDF))
+                              Lawyers, Leverage, 
+                              MnARevenue, EquityRevenue, IPORevenue,
+                              MnANumOfDeals, EquityIssues, IPOIssues)
+  
   names(corDF) <- gsub("GrossRev", "Gross Rev", names(corDF))
   names(corDF) <- gsub(".eqPart", "/Eq Partner", names(corDF))
   names(corDF) <- gsub(".Lawyer", "/Lawyer", names(corDF))
@@ -187,7 +214,7 @@ GenerateCorrelations <- function(df) {
 
 GenerateCorrelationsByRank <- function(df) {
   corrDf = df %>% select(Lawyers, Leverage, GrossRev, GrossRev.Lawyer, GrossRev.eqPart, 
-                         NOI, NOI.Lawyer, NOI.eqPart, MnARevenue, IPORevenue, EquityRevenue) %>% as.data.frame()
+                         NOI, NOI.Lawyer, NOI.eqPart, MnARevenue, EquityRevenue, IPORevenue) %>% as.data.frame()
   names(corrDf) = c("Lawyers", "Leverage", "Rev", "Rev/Law", "Rev/EqPart", "NOI", "NOI/Law", "NOI/EqPart",
                     "MnA", "IPO", "Equity")
   
@@ -300,6 +327,14 @@ SaveCorrelationsByRankPlots <- function(df, correlRanks) {
       labs(title = paste("Ranked Firms by", outcomeText[i]), x="Year", y=outcomeText[i]) +
       scale_linetype_discrete(guide=FALSE) + scale_color_discrete(name="Variable") + theme_bw() +
       scale_y_continuous(sec.axis = sec_axis(~./fac, name = "Agg M&A, GDP (in millions)"))
+    
+    #ltlegend <- c("dotdash", "dotdash", rep("solid", length(unique(plotDF$variable))-2))
+    #ggplot(data=plotDF, aes(x=Year, y=value, color=variable, linetype=lt)) + geom_line() + 
+      # labs(title = paste("Ranked Firms by", outcomeText[i]), x="Year", y=outcomeText[i]) +
+      # scale_color_manual(name="Variable", values=unique(plotDF$variable)) +
+      # scale_linetype_manual(name="Variable", values=ltlegend) +
+      # scale_y_continuous(sec.axis = sec_axis(~./fac, name = "Agg M&A, GDP (in millions)"))
+    
     graphName <- paste("IndivTexOutput/MnAGDP-", i, ".jpg", sep="")
     ggsave(graphName, p)
   }
@@ -382,7 +417,7 @@ GeneratePerformanceTable <- function(resultsPerformance) {
   }
   
   row.names(mainDF) <- 1:nrow(mainDF)
-  names(mainDF) <- c("Outcome", "Dependent Variables", "Lawyers", "Fixed Effects", "Adj R^2", names(mainDF)[6:8])
+  names(mainDF) <- c("Outcome", "Dependent Variables", "Lawyers", "Fixed Effects", "Adj R^2", names(mainDF)[6:9])
   
   mainDF$Outcome <- gsub("_NoRatio", "", mainDF$Outcome)
   mainDF$Outcome <- gsub("GrossRev", "Gross Rev", mainDF$Outcome)

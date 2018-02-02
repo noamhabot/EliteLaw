@@ -50,7 +50,7 @@ library(lm.beta)
 
 
 ##### Load dataframe
-setwd("~/Google Drive/Stanford Law Project")
+setwd("~/Google Drive/EliteLaw")
 load('Data/EliteLawDf2016.RData')
 ```
 
@@ -70,13 +70,13 @@ numTiers <- 2
 # the model from which we want to extract the coefficients
 # choice of:
 # lm, ridge, lasso
-method <- "lasso"
+method <- "lm"
 
 # set the output
-#Output = df$GrossRev/df$Lawyers
-#outputText <- "GrossRevenuePerLawyer"
-Output = df$NOI.eqPart
-outputText <- "NOIPerEquityPartner"
+# Output = df$GrossRev/df$Lawyers
+# outputText <- "GrossRevenuePerLawyer"
+Output = df$GrossRev
+outputText <- "GrossRev"
 
 # deletes an existing and creates a new wholeResults table
 wholeResults <- data.frame(Firm=character(0), YearFrom=numeric(0), YearTo=numeric(0),
@@ -104,11 +104,22 @@ for (y in 1988:2016) {
 
 fakeTable <- data.frame()
 
-getCoeff <- function(dfForCoeff, forFakeTable) {
+getCoeff <- function(dfForCoeff, forFakeTable, firstBreakpoint) {
   alpha <- 0
   if (method == "lm") {
-    #return(lm(model$terms, data=dfForCoeff)$coefficients["MnA"])
-    return(coef(lm.beta(lm(model$terms, data=dfForCoeff)))["MnARevenue"])
+    # looking at the normal coefficient is not good enough indicator of the importance
+    # of a variable; it depends on the units, and does not do well with multicollinear variables.
+    ##### NEVER DO THIS
+    #return(lm(model$terms, data=dfForCoeff)$coefficients["MnARevenue"])
+    ##### NEVER DO THIS
+    
+    # TRY recording/returning the AdjR^2 with MnaRevenue and without; higher diff means it's more significant.
+    modelWithout <- lm(Output ~ ., data=dfForCoeff[, !(names(dfForCoeff) %in% c("MnARevenue"))] )
+    modelWith <- lm(Output ~ ., data=dfForCoeff)
+    diff <- summary(modelWith)$r.squared - summary(modelWithout)$r.squared
+    #return(diff)
+    
+    return(coef(lm.beta(lm(Output ~ ., data=dfForCoeff )))["MnARevenue"])
   } else if (method == "lasso") {
     alpha <- 1
   }
@@ -139,20 +150,25 @@ getCoeff <- function(dfForCoeff, forFakeTable) {
 
 
 # Set the main covariates
-covariates = df %>% select(FirmName, Year, Lawyers, Lawyers2, MnARevenue, EquityRevenue, IPORevenue, Leverage)
+covariates <- df %>% select(FirmName, Year, Lawyers, Lawyers2, Leverage, 
+                           MnARevenue, EquityRevenue, IPORevenue, 
+                           MnANumOfDeals, EquityIssues, IPOIssues)
+# Note: MnANumOfDeals = MnAIssues
+# lawyers, lawyers^2, leverage, intercept, mnarevenue, equityrevenue, iporevenue, ipoissues, equityissues, mnaissues
 
 # Get factor variables Year and Firm
 #years = data.frame(Years = as.factor(df$Year - min(df$Year) + 1))
 #firms = data.frame(FirmID = as.character(df$FirmID))
 
 # Merge into one main dataset
-#dataset = cbind(Output, covariates)
-dataset = cbind(Output, df)
+dataset = cbind(Output, covariates)
+#dataset = cbind(Output, df)
 dataset = dataset %>% na.omit()
 
 r2Vec <- c()
 for (i in 1:nrow(wholeResults)) {
   print(paste("Working on row:", i, "out of", nrow(wholeResults)))
+  #if (i==9 || i==12) { next; }
   
   ##### Initialization variables
   # YearFrom, YearTo
@@ -171,31 +187,42 @@ for (i in 1:nrow(wholeResults)) {
   currDataset <- currDataset[order(currDataset$Output, decreasing=TRUE),]
   
   
-  # eliminate 3 and 6 => the firm names and the revenue
-  dfForRegression <- currDataset[,!(names(currDataset) %in% c("FirmName","FirmID","GrossRev", "Rank", "AggMnA", "AggEquity", "AggIPO"))]
+  # eliminate the firm names and the revenue
+  dfForRegression <- currDataset[,!(names(currDataset) %in% c("FirmName", "Year"))]
+  #dfForRegression <- currDataset[,!(names(currDataset) %in% c("FirmName","FirmID","GrossRev", "Rank", "AggMnA", "AggEquity", "AggIPO"))]
   
   
   
-  model <- lm(Output ~ Lawyers + Lawyers2 + MnARevenue + EquityRevenue + IPORevenue + Leverage, data=dfForRegression)
+  model <- lm(Output ~ ., data=dfForRegression)
   r2Vec <- c(r2Vec, summary(model)$r.squared)
   
 
   if (numTiers == 1) {
-    wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression, FALSE)
+    wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression, FALSE, model)
   } else if (numTiers > 1) {
     b <- breakpoints(model$terms, data=dfForRegression, breaks=(numTiers-1))
     firstBreakpoint <- b$breakpoints[1]
     lastRow <- nrow(dfForRegression)
     
-    wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression[1:b$breakpoints[1], ], FALSE)
+    tryme <- 1
+    while (is.na(firstBreakpoint)){
+      b <- breakpoints(model$terms, data=dfForRegression, breaks=(numTiers-1+tryme))
+      firstBreakpoint <- b$breakpoints[1]
+      tryme <- tryme + 1
+    }
+    
+    #wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression[1:firstBreakpoint, ], FALSE)/firstBreakpoint
+    wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression[1:firstBreakpoint, ], FALSE)
     if (numTiers == 2 || is.na(b$breakpoints[2])) {
-      wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[1]+1):lastRow, ], FALSE)
+      #wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(firstBreakpoint+1):lastRow, ], FALSE)/(lastRow-firstBreakpoint-1)
+      wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(firstBreakpoint+1):lastRow, ], FALSE)
+      
     } else {
       wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[1]+1):b$breakpoints[2], ], FALSE)
       if (numTiers == 3 || is.na(b$breakpoints[3])) {
         wholeResults[i, "tier3Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[2]+1):lastRow, ], FALSE)
       } else {
-        wholeResults[i, "tier3Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[2]+1):b$breakpoints[3], ], FALSE)
+        wholeResults[i, "tier3Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[2]+1):b$breakpoints[3], ], FALSE, firstBreakpoint)
         if (numTiers == 4 || is.na(b$breakpoints[4])) {
           wholeResults[i, "tier4Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[3]+1):lastRow, ], FALSE)
         } else {
@@ -208,7 +235,7 @@ for (i in 1:nrow(wholeResults)) {
 
   
   #wholeResults[i, "AllFirmsMnAPval"] <- summary(lm(model$terms, data=dfForRegression))$coefficients["MnARevenue", 4]
-  fakeTable <- getCoeff(dfForRegression, TRUE)
+  fakeTable <- getCoeff(dfForRegression, TRUE, model)
   
   
   wholeResults[i, "NumYears"] <- yearTo-yearFrom+1
@@ -224,6 +251,7 @@ for (i in 1:nrow(wholeResults)) {
 }
 
 p <- plotOverYears(wholeResults, numTiers, method, outputText)
+show(p)
 
 name <- paste(wholeResults$YearFrom[1], wholeResults$YearFrom[nrow(wholeResults)], method, outputText, numTiers, sep="-")
 fileName <- paste("Generate Latex/IndivTexOutput/methods-", name, ".jpg", sep="")
