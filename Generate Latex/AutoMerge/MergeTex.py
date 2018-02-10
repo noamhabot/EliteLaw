@@ -1,7 +1,9 @@
 import glob, os, re, subprocess
 
-fileText = "\\documentclass{article}\n\\usepackage{subfig}\n\\usepackage{graphicx}\n\\usepackage{multirow}\n\\usepackage{float}\n\\usepackage[landscape, margin=1in, tmargin=0.5in, bmargin=0.5in]{geometry}\n\\begin{document}"
-fileText += "\n\\begin{center}{\LARGE Elite Law Analysis}\n\\\\\n\\begin{tabular}{rl}\\\\Professor Joseph Grundfest, Professor Laurie Hodrick, Noam Habot \\\\January 2018\\end{tabular}\\end{center}"
+date = "February 9, 2018"
+
+fileText = "\\documentclass{article}\n\\usepackage{subfig}\n\\usepackage{graphicx}\n\\usepackage{multirow}\n\\usepackage{float}\n\\usepackage[landscape, margin=0.5in, tmargin=0.5in, bmargin=0.5in]{geometry}\n\\begin{document}"
+fileText += "\n\\begin{center}{\LARGE Elite Law Analysis}\n\\\\\n\\begin{tabular}{rl}\\\\Professor Joseph Grundfest, Professor Laurie Hodrick, Noam Habot \\\\"+date+"\\end{tabular}\\end{center}"
 
 
 filesWritten = []
@@ -43,6 +45,9 @@ def regressionsTable(f):
     if 'without Lawyers' in title:
         body = re.sub(' \\\\', r' & \\', body)
 
+
+    body = re.sub('Regression Num', 'Regression \\#', body)
+    body = re.sub('MaxVIF', 'Max VIF', body)
     body = re.sub('Observations', '\hline \n Observations', body)
     body = re.sub('R2', 'R^2', body)
 
@@ -161,6 +166,9 @@ fileText += addCategory("regressions", "Regressions")
 
 # # now add all the regression Performance files:
 fileText += addCategory("performance", "Regression Performance")
+
+# # now add all the regression Performance files:
+fileText += addCategory("pvaltable", "P-Value Summary")
 
 # # now add all the files for model averaging:
 fileText += addCategory("ModelAveraging", "Model Averaging")

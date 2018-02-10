@@ -19,25 +19,24 @@ source('../Analysis/ModelAveraging.R')
 
 
 
-
+################################################################
 ###################### Summary Statistics ######################
 summaryTables <- GenerateSummaryStatistics(df)
 alignment <- paste(c("l",rep("r",ncol(summaryTables))), collapse="")
 print(xtable(summaryTables, align=alignment), file="IndivTexOutput/summary.tex", 
       sanitize.text.function=function(x){x})
-##################################################################
+################################################################
 
 
 
-
-###################### Correlations ######################
+################################################################
+###################### Correlations ############################
 # # get the correlations table
 corDF <- GenerateCorrelations(df)
-corDF <- round(cor(corDF),3) # the journal uses 3 significant figures
 
-print(xtable(corDF[,1:6], digits=3), file="IndivTexOutput/corrTable1.tex")
-print(xtable(corDF[,7:10], digits=3), file="IndivTexOutput/corrTable2.tex")
-print(xtable(corDF[,11:ncol(corDF)], digits=3), file="IndivTexOutput/corrTable3.tex")
+print(xtable(corDF, digits=3), file="IndivTexOutput/corrTable.tex")
+# print(xtable(corDF[,7:10], digits=3), file="IndivTexOutput/corrTable2.tex")
+# print(xtable(corDF[,11:ncol(corDF)], digits=3), file="IndivTexOutput/corrTable3.tex")
 
 
 # prints the correlation table by rank
@@ -46,128 +45,20 @@ correlationsByRank <- corByRank[[1]]
 print(xtable(correlationsByRank, digits=3), file="IndivTexOutput/MnAGDP.tex")
 
 # now make the 6 graphs with correlations
-correlRanks <- corByRank[[2]]
-SaveCorrelationsByRankPlots(df, correlRanks)
-##################################################################
+#correlRanks <- corByRank[[2]]
+#SaveCorrelationsByRankPlots(df, correlRanks)
+################################################################
 
 
 
-###################### Regression Tables ######################
-
-# Build the appropriate dataframes by slicing from the correct columns 
-#Performance.Rev.Lawyer.With.Lawyers = resultsPerformance[, 1:9] # unused
-# Generate the Performance Table
-GeneratePerformanceTable(resultsPerformance)
+################################################################
+###################### Regression Tables #######################
 
 
-# Set the possible Configurations
-modelOutputs = c("GrossRev", "GrossRev.eqPart", "NOI", "NOI.eqPart")
-outputDenominators = c("NoRatio", "PerLawyer")
-excludeLawyers = c("WithLawyers2", "WithLawyersLog", "WithoutLawyers")
-firmFixedEffects = c("FirmFE", "NoFirmFE", "Lawyers")
-fixedEffects = c("FE3", "FE1", "FEYear", "NoFE")
-dealsAndOrRevenues = c("Both", "Revenue", "Deals")
-
-# we do the subtraction because NOI.eqPart should not have the PerLawyer attached to it.
-numTables <- length(dealsAndOrRevenues)*length(modelOutputs)*length(outputDenominators)*length(excludeLawyers) - 
-  2*length(excludeLawyers)*length(dealsAndOrRevenues)
 
 
-dealsAndOrRevenue <- "Deals"
-modelOutput <- "GrossRev"
-outputDenominator <- "NoRatio"
-excludeLawyer <- "WithLawyers2"
-
-tables <- vector("list", numTables)
-counter <- 1
-
-
-for (modelOutput in modelOutputs) {
-  # first subset
-  thisSubset1 <- names(resultsCoeffs)[grepl(modelOutput, names(resultsCoeffs))]
-  
-  if (modelOutput == "NOI") {
-    # deselect all of the NOI.eqPart
-    thisSubset1 <- thisSubset1[!grepl("NOI.eqPart", thisSubset1)]
-  } else if (modelOutput == "GrossRev") {
-    # deselect all of the GrossRev.eqPart
-    thisSubset1 <- thisSubset1[!grepl("GrossRev.eqPart", thisSubset1)]
-  }
-  
-  
-    
-    
-  for (outputDenominator in outputDenominators) {
-    if (outputDenominator == "PerLawyer" && (modelOutput == "NOI.eqPart" || modelOutput == "GrossRev.eqPart")) {
-      next
-    }
-    thisSubset2 <- thisSubset1[grepl(outputDenominator, thisSubset1)]
-    
-    
-    
-    
-    for (dealsAndOrRevenue in dealsAndOrRevenues) {
-      thisSubset3 <- thisSubset2[grepl(dealsAndOrRevenue, thisSubset2)]
-      
-      for (excludeLawyer in excludeLawyers) {
-        thisSubset4 <- thisSubset3[grepl(excludeLawyer, thisSubset3)]
-        
-        
-        
-        
-        # STRICTLY DEBUGGING# STRICTLY DEBUGGING# STRICTLY DEBUGGING
-        dfCoeff = resultsCoeffs[, thisSubset4]
-        dfTValue = resultsTValues[, thisSubset4]
-        dfPValue = resultsPValues[, thisSubset4]
-        # STRICTLY DEBUGGING# STRICTLY DEBUGGING# STRICTLY DEBUGGING
-        
-        
-        
-        thisTable <- GenerateLatexInference(resultsCoeffs[, thisSubset4], resultsTValues[, thisSubset4], 
-                                            resultsPValues[, thisSubset4])
-        
-        caption <- ""
-        if (modelOutput == "GrossRev") {
-          caption <- paste(caption, "Gross Revenue", sep="")
-        } else if (modelOutput == "NOI") {
-          caption <- paste(caption, "NOI", sep="")
-        } else if (modelOutput == "NOI.eqPart") {
-          caption <- paste(caption, "NOI/EquityPartner", sep="")
-        } else if (modelOutput == "GrossRev.eqPart") {
-          caption <- paste(caption, "GrossRevenue/EquityPartner", sep="")
-        }
-        
-        if (outputDenominator == "PerLawyer" && modelOutput != "NOI.eqPart" && modelOutput != "GrossRev.eqPart") {
-          caption <- paste(caption, "/Lawyer", sep="")
-        }
-        
-        if (dealsAndOrRevenue == "Both") {
-          caption <- paste(caption, " $\\sim$ Revenue + Counts", sep="")
-        } else if (dealsAndOrRevenue == "Deals") {
-          caption <- paste(caption, " $\\sim$ Counts", sep="")
-        } else if (dealsAndOrRevenue == "Revenue") {
-          caption <- paste(caption, " $\\sim$ Revenue", sep="")
-        }
-        
-        if (excludeLawyer == "WithoutLawyers") {
-          caption <- paste(caption, " (without Lawyers)", sep="")
-        } else if (excludeLawyer == "WithLawyers2") {
-          caption <- paste(caption, " (with Lawyers$^2$)", sep="")
-        } else if (excludeLawyer == "WithLawyersLog") {
-          caption <- paste(caption, " (with log(Lawyers))", sep="")
-        }
-        print(paste(counter, modelOutput, outputDenominator, dealsAndOrRevenue, excludeLawyer))
-        tables[[counter]] <- xtable(thisTable, caption=caption)
-        counter <- counter + 1
-      }
-    }
-    
-  }
-  
-}
-
-
-  
+# Build all of the regression tables and save them in an organized fashion.
+tables <- GenerateRegressionTables(resultsCoeffs,resultsTValues, resultsPValues)
 
 # save all of the latex tables to files
 for (i in 1:length(tables)) {
@@ -181,8 +72,28 @@ for (i in 1:length(tables)) {
 
 
 
+# Build the appropriate dataframes by slicing from the correct columns 
+#Performance.Rev.Lawyer.With.Lawyers = resultsPerformance[, 1:9] # unused
+# Generate the Performance Table
+GeneratePerformanceTable(resultsPerformance)
+
+
+# Generate and save the summary table for the p-values
+table <- GeneratePValueSummaryTable(resultsPValues)
+alignment <- paste(c("l",rep("c",ncol(table))), collapse="")
+caption <- paste("Percentage of regressions in which each variable is significant at, and in how many the variable appears.\\\\Total number of regressions: ", max(table[,ncol(table)]), ".", sep="")
+print(xtable(table,digits=0, align=alignment, caption=caption), 
+      file="IndivTexOutput/pvaltable.tex", sanitize.text.function=function(x){x})
+################################################################
+
+
+
+
+################################################################
+####################### Model Averaging# #######################
 # save the model averaging to the tables
 #saveModelAveraging(df)
+################################################################
 
 
 
@@ -193,7 +104,7 @@ for (i in 1:length(tables)) {
 
 
 ####################################################################################
-######################################### UNUSED CORRELATION PLOTS##################
+############################ UNUSED CORRELATION PLOTS ##############################
 ####################################################################################
 # 
 # # save the correlation heatmap

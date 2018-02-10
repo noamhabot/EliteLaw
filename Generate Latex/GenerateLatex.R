@@ -1,7 +1,7 @@
 library(stringr)
 library(ggplot2)
 
-GenerateLatexInference = function(dfCoeff, dfTValue, dfPValue){
+GenerateLatexInference = function(dfCoeff, dfTValue, dfPValue, interval){
   
   
   
@@ -20,7 +20,7 @@ GenerateLatexInference = function(dfCoeff, dfTValue, dfPValue){
   # Loop through every coefficient
   output = data.frame()
   currRow = 0
-  for(i in 1:(nrow(dfCoeff)-5)){
+  for(i in 1:(nrow(dfCoeff)-8)){
     
     # Incremenet rows with coefficients
     output = rbind(output, dfCoeff[i, ])
@@ -95,10 +95,138 @@ GenerateLatexInference = function(dfCoeff, dfTValue, dfPValue){
   }
   
   # Add observations, r-squared and adjusted r-squared
-  output = rbind(output, dfCoeff[(nrow(dfCoeff)-4):nrow(dfCoeff), ])
+  output = rbind(output, dfCoeff[(nrow(dfCoeff)-7):nrow(dfCoeff), ])
+  output["MaxVIF",] <- sprintf("%.2f", round(as.numeric(output["MaxVIF",]),2))
+  output["Regression Num",] <- interval
   
   return(output)
 }
+
+
+
+GenerateRegressionTables <- function(resultsCoeffs,resultsTValues, resultsPValues) {
+  # Set the possible Configurations
+  modelOutputs = c("GrossRev", "GrossRev.eqPart", "NOI", "NOI.eqPart")
+  outputDenominators = c("NoRatio", "PerLawyer")
+  excludeLawyers = c("WithLawyers", "WithLawyers2", "WithLawyersLog", "WithoutLawyers")
+  firmFixedEffects = c("FirmFE", "NoFirmFE", "Lawyers")
+  fixedEffects = c("FE3", "FE1", "FEYear", "NoFE")
+  dealsAndOrRevenues = c("Both", "Revenue", "Deals")
+  
+  # we do the subtraction because NOI.eqPart should not have the PerLawyer attached to it.
+  numTables <- length(dealsAndOrRevenues)*length(modelOutputs)*length(outputDenominators)*length(excludeLawyers) - 
+    2*length(excludeLawyers)*length(dealsAndOrRevenues)
+  
+  
+  dealsAndOrRevenue <- "Both"
+  modelOutput <- "GrossRev"
+  outputDenominator <- "NoRatio"
+  excludeLawyer <- "WithLawyers"
+  
+  tables <- vector("list", numTables)
+  counter <- 1
+  latestRegNumber <- 1
+  
+  for (modelOutput in modelOutputs) {
+    # first subset
+    thisSubset1 <- names(resultsCoeffs)[grepl(modelOutput, names(resultsCoeffs))]
+    
+    if (modelOutput == "NOI") {
+      # deselect all of the NOI.eqPart
+      thisSubset1 <- thisSubset1[!grepl("NOI.eqPart", thisSubset1)]
+    } else if (modelOutput == "GrossRev") {
+      # deselect all of the GrossRev.eqPart
+      thisSubset1 <- thisSubset1[!grepl("GrossRev.eqPart", thisSubset1)]
+    }
+    
+    
+    
+    
+    for (outputDenominator in outputDenominators) {
+      if (outputDenominator == "PerLawyer" && (modelOutput == "NOI.eqPart" || modelOutput == "GrossRev.eqPart")) {
+        next
+      }
+      thisSubset2 <- thisSubset1[grepl(outputDenominator, thisSubset1)]
+      
+      
+      
+      
+      for (dealsAndOrRevenue in dealsAndOrRevenues) {
+        thisSubset3 <- thisSubset2[grepl(dealsAndOrRevenue, thisSubset2)]
+        
+        for (excludeLawyer in excludeLawyers) {
+          thisSubset4 <- thisSubset3[grepl(excludeLawyer, thisSubset3)]
+          if (excludeLawyer == "WithLawyers") {
+            # deselect all of the WithLawyers2 and WithLawyersLog
+            thisSubset4 <- thisSubset4[!grepl("WithLawyers2", thisSubset4)]
+            thisSubset4 <- thisSubset4[!grepl("WithLawyersLog", thisSubset4)]
+          }
+          
+          
+          
+          
+          # STRICTLY DEBUGGING# STRICTLY DEBUGGING# STRICTLY DEBUGGING
+          dfCoeff = resultsCoeffs[, thisSubset4]
+          dfTValue = resultsTValues[, thisSubset4]
+          dfPValue = resultsPValues[, thisSubset4]
+          # STRICTLY DEBUGGING# STRICTLY DEBUGGING# STRICTLY DEBUGGING
+          
+          
+          # calculate how many regressions we have in this table
+          numRegressionsInThisTable <- 9 # usually 9 regressions. we have 8 if without lawyers
+          if (excludeLawyer == "WithoutLawyers") {
+            numRegressionsInThisTable <- numRegressionsInThisTable - 1
+          }
+          interval <- latestRegNumber:(latestRegNumber+numRegressionsInThisTable-1)
+          latestRegNumber <- latestRegNumber+numRegressionsInThisTable
+          
+          thisTable <- GenerateLatexInference(resultsCoeffs[, thisSubset4], resultsTValues[, thisSubset4], 
+                                              resultsPValues[, thisSubset4], interval)
+          
+          caption <- ""
+          if (modelOutput == "GrossRev") {
+            caption <- paste(caption, "Gross Revenue", sep="")
+          } else if (modelOutput == "NOI") {
+            caption <- paste(caption, "NOI", sep="")
+          } else if (modelOutput == "NOI.eqPart") {
+            caption <- paste(caption, "NOI/EquityPartner", sep="")
+          } else if (modelOutput == "GrossRev.eqPart") {
+            caption <- paste(caption, "GrossRevenue/EquityPartner", sep="")
+          }
+          
+          if (outputDenominator == "PerLawyer" && modelOutput != "NOI.eqPart" && modelOutput != "GrossRev.eqPart") {
+            caption <- paste(caption, "/Lawyer", sep="")
+          }
+          
+          if (dealsAndOrRevenue == "Both") {
+            caption <- paste(caption, " $\\sim$ Revenue + Issues", sep="")
+          } else if (dealsAndOrRevenue == "Deals") {
+            caption <- paste(caption, " $\\sim$ Issues", sep="")
+          } else if (dealsAndOrRevenue == "Revenue") {
+            caption <- paste(caption, " $\\sim$ Revenue", sep="")
+          }
+          
+          if (excludeLawyer == "WithoutLawyers") {
+            caption <- paste(caption, " (without Lawyers)", sep="")
+          } else if (excludeLawyer == "WithLawyers2") {
+            caption <- paste(caption, " (with Lawyers$^2$)", sep="")
+          } else if (excludeLawyer == "WithLawyersLog") {
+            caption <- paste(caption, " (with log(Lawyers))", sep="")
+          } else if (excludeLawyer == "WithLawyers") {
+            caption <- paste(caption, " (with Lawyers)", sep="")
+          }
+          print(paste(counter, modelOutput, outputDenominator, dealsAndOrRevenue, excludeLawyer))
+          tables[[counter]] <- xtable(thisTable, caption=caption)
+          counter <- counter + 1
+        }
+      }
+      
+    }
+    
+  }
+  return(tables)
+}
+#GenerateRegressionTables(resultsCoeffs,resultsTValues, resultsPValues)
 
 
 
@@ -163,11 +291,11 @@ GenerateSummaryStatistics <- function(df) {
   # add units in parenthesis
   names(answer) <- gsub("Leverage", "Leverage (ratio)", names(answer))
   names(answer) <- gsub("^Gross Rev$", "Gross Rev (US\\\\$)", names(answer))
-  names(answer) <- gsub("^Gross Rev/Lawyer$", "Gross Rev/Lawyer (US\\\\$/pers.)", names(answer))
-  names(answer) <- gsub("^Gross Rev/Eq Partner$", "Gross Rev/Eq Partner (US\\\\$/pers.)", names(answer))
+  names(answer) <- gsub("^Gross Rev/Lawyer$", "Gross Rev/Lawyer (US\\\\$/Lawyer)", names(answer))
+  names(answer) <- gsub("^Gross Rev/Eq Partner$", "Gross Rev/Eq Partner (US\\\\$/Eq Partner)", names(answer))
   names(answer) <- gsub("^NOI$", "NOI (US\\\\$)", names(answer))
-  names(answer) <- gsub("^NOI/Lawyer$", "NOI/Lawyer (US\\\\$/pers.)", names(answer))
-  names(answer) <- gsub("^NOI/Eq Partner$", "NOI/Eq Partner (US\\\\$/pers.)", names(answer))
+  names(answer) <- gsub("^NOI/Lawyer$", "NOI/Lawyer (US\\\\$/Lawyer)", names(answer))
+  names(answer) <- gsub("^NOI/Eq Partner$", "NOI/Eq Partner (US\\\\$/Eq Partner)", names(answer))
   
   names(answer) <- gsub("^MnA Rev$", "MnA Rev (US\\\\$Millions)", names(answer))
   names(answer) <- gsub("^Agg MnA $", "Agg MnA (US\\\\$Millions)", names(answer))
@@ -193,7 +321,7 @@ GenerateCorrelations <- function(df) {
   #numeric$NOIPLawyer <- numeric$NOI/numeric$Lawyers
   corDF <- numeric %>% select(GrossRev, GrossRev.Lawyer, GrossRev.eqPart,
                               NOI, NOI.Lawyer, NOI.eqPart,
-                              Lawyers, Leverage, 
+                              Lawyers, Leverage, EqPartners,
                               MnARevenue, EquityRevenue, IPORevenue,
                               MnANumOfDeals, EquityIssues, IPOIssues)
   
@@ -203,6 +331,11 @@ GenerateCorrelations <- function(df) {
   names(corDF) <- gsub("MnA", "M&A ", names(corDF))
   names(corDF) <- gsub("Equity", "Equity ", names(corDF))
   names(corDF) <- gsub("IPO", "IPO ", names(corDF))
+  names(corDF) <- gsub("NumOfDeals", "Issues", names(corDF))
+  
+  corDF <- round(cor(corDF),3) # the journal uses 3 significant figures
+  row.names(corDF) <- paste(row.names(corDF), " (", 1:nrow(corDF), ")", sep="")
+  colnames(corDF) <- paste("(", 1:15, ")", sep="")
   
   return (corDF)
 }
@@ -287,58 +420,67 @@ GenerateCorrelationsByRank <- function(df) {
 }
 
 
-SaveCorrelationsByRankPlots <- function(df, correlRanks) {
-  
-  outcomes <- c("Rev", "Rev.Lawyer", "Rev.EqPart", "NOI", "NOI.Lawyer", "NOI.EqPart")
-  
-  outcomeText <- gsub(".EqPart", "/Eq Partner", outcomes)
-  outcomeText <- gsub(".Lawyer", "/Lawyer", outcomeText)
-  outcomeText <- gsub("Rev", "Gross Rev", outcomeText)
-  
-  
-  for (i in 1:length(outcomes)) {
-    outcome <- outcomes[i]
-    subset <- names(correlRanks)[grepl(outcome, names(correlRanks))]
-    if (outcome == "Rev" || outcome == "NOI") {
-      subset <- subset[!grepl(".EqPart", subset)]
-      subset <- subset[!grepl(".Lawyer", subset)]
-    }
-    subset <- c("Year", "AggMnA", "GDP", subset)
-    
-    
-    
-    thisDF <- correlRanks[,subset]
-    names(thisDF) <- gsub(paste(".",outcome,sep=""), "", names(thisDF))
-    fac <- max(thisDF) * 1.6 / max(correlRanks$AggMnA)
-    
-    #fac <- 3000
-    thisDF$GDP <- thisDF$GDP*fac
-    thisDF$AggMnA <- thisDF$AggMnA*fac
-    
-    # create the plotting data frame
-    plotDF <- melt(thisDF, id="Year")
-    # add the linetypes
-    plotDF$lt <- rep("dotdash", nrow(plotDF))
-    # change AggMnA to different line style
-    plotDF$lt[plotDF$variable == "AggMnA"] <- "solid"
-    plotDF$lt[plotDF$variable == "GDP"] <- "solid"
-    
-    p <- ggplot(data=plotDF, aes(x=Year, y=value, color=variable, linetype=lt)) + geom_line() + 
-      labs(title = paste("Ranked Firms by", outcomeText[i]), x="Year", y=outcomeText[i]) +
-      scale_linetype_discrete(guide=FALSE) + scale_color_discrete(name="Variable") + theme_bw() +
-      scale_y_continuous(sec.axis = sec_axis(~./fac, name = "Agg M&A, GDP (in millions)"))
-    
-    #ltlegend <- c("dotdash", "dotdash", rep("solid", length(unique(plotDF$variable))-2))
-    #ggplot(data=plotDF, aes(x=Year, y=value, color=variable, linetype=lt)) + geom_line() + 
-      # labs(title = paste("Ranked Firms by", outcomeText[i]), x="Year", y=outcomeText[i]) +
-      # scale_color_manual(name="Variable", values=unique(plotDF$variable)) +
-      # scale_linetype_manual(name="Variable", values=ltlegend) +
-      # scale_y_continuous(sec.axis = sec_axis(~./fac, name = "Agg M&A, GDP (in millions)"))
-    
-    graphName <- paste("IndivTexOutput/MnAGDP-", i, ".jpg", sep="")
-    ggsave(graphName, p)
-  }
-}
+# SaveCorrelationsByRankPlots <- function(df, correlRanks) {
+#   
+#   outcomes <- c("Rev", "Rev.Lawyer", "Rev.EqPart", "NOI", "NOI.Lawyer", "NOI.EqPart")
+#   
+#   outcomeText <- gsub(".EqPart", "/Eq Partner", outcomes)
+#   outcomeText <- gsub(".Lawyer", "/Lawyer", outcomeText)
+#   outcomeText <- gsub("Rev", "Gross Rev", outcomeText)
+#   
+#   
+#   for (i in 1:length(outcomes)) {
+#     outcome <- outcomes[i]
+#     subset <- names(correlRanks)[grepl(outcome, names(correlRanks))]
+#     if (outcome == "Rev" || outcome == "NOI") {
+#       subset <- subset[!grepl(".EqPart", subset)]
+#       subset <- subset[!grepl(".Lawyer", subset)]
+#     }
+#     subset <- c("Year", "AggMnA", "GDP", subset)
+#     
+#     
+#     
+#     thisDF <- correlRanks[,subset]
+#     # remove .Rev etc. from the name of the column
+#     names(thisDF) <- gsub(paste(".",outcome,sep=""), "", names(thisDF))
+#     
+#     # replace all the rank columns with their correlations
+#     #thisDF[,grepl("Rank", names(thisDF))]
+#     #grepl("Rank", names(thisDF))
+#     thisDF[,grepl("Rank", names(thisDF))] <- sapply(thisDF[,grepl("Rank", names(thisDF))], function(x) (x-thisDF$GDP)/max(thisDF$GDP) )
+#     
+#     
+#     fac <- max(thisDF) * 1.6 / max(correlRanks$AggMnA)
+#     
+#     #fac <- 3000
+#     thisDF$GDP <- thisDF$GDP*fac
+#     #thisDF$AggMnA <- thisDF$AggMnA*fac
+#     
+#     # create the plotting data frame
+#     plotDF <- melt(thisDF, id="Year")
+#     # add the linetypes
+#     plotDF$lt <- rep("dotdash", nrow(plotDF))
+#     # change AggMnA to different line style
+#     plotDF$lt[plotDF$variable == "AggMnA"] <- "solid"
+#     plotDF$lt[plotDF$variable == "GDP"] <- "solid"
+#     
+#     p <- ggplot(data=plotDF, aes(x=Year, y=value, color=variable, linetype=lt)) + geom_line() + 
+#       labs(title = paste("Ranked Firms by", outcomeText[i]), x="Year", y=outcomeText[i]) +
+#       scale_linetype_discrete(guide=FALSE) + scale_color_discrete(name="Variable") + theme_bw() +
+#       scale_y_continuous(sec.axis = sec_axis(~./fac, name = "Agg M&A, GDP (in millions)"))
+#     show(p)
+#     #ltlegend <- c("dotdash", "dotdash", rep("solid", length(unique(plotDF$variable))-2))
+#     #ggplot(data=plotDF, aes(x=Year, y=value, color=variable, linetype=lt)) + geom_line() + 
+#       # labs(title = paste("Ranked Firms by", outcomeText[i]), x="Year", y=outcomeText[i]) +
+#       # scale_color_manual(name="Variable", values=unique(plotDF$variable)) +
+#       # scale_linetype_manual(name="Variable", values=ltlegend) +
+#       # scale_y_continuous(sec.axis = sec_axis(~./fac, name = "Agg M&A, GDP (in millions)"))
+#     
+#     #graphName <- paste("IndivTexOutput/MnAGDP-", i, ".jpg", sep="")
+#     #ggsave(graphName, p)
+#   }
+# }
+# SaveCorrelationsByRankPlots(df, correlRanks)
 
 
 printHorizontally <- function(mainDF) {
@@ -387,7 +529,7 @@ GeneratePerformanceTable <- function(resultsPerformance) {
   outcomes <- c("GrossRev_NoRatio", "GrossRev_PerLawyer", "GrossRev.eqPart_NoRatio", 
                 "NOI_NoRatio", "NOI_PerLawyer", "NOI.eqPart_NoRatio")
   types <- c("Both", "Revenue", "Deals")
-  lawyers <- c("WithLawyers2", "WithLawyersLog", "WithoutLawyers")
+  lawyers <- c("WithLawyers", "WithLawyers2", "WithLawyersLog", "WithoutLawyers")
   
   mainDF <- data.frame(matrix(ncol=8, nrow=0))
   
@@ -402,6 +544,11 @@ GeneratePerformanceTable <- function(resultsPerformance) {
       
       for (lawyer in lawyers) {
         subset2 <- subset1[grepl(lawyer, subset1)]
+        if (lawyer == "WithLawyers") {
+          # deselect the lawyer2 and lawyerslog variables
+          subset2 <- subset2[!grepl("WithLawyers2", subset2)]
+          subset2 <- subset2[!grepl("WithLawyersLog", subset2)]
+        }
         
         fixedEffects <- c()
         splitted <- strsplit(subset2, '_')
@@ -417,20 +564,24 @@ GeneratePerformanceTable <- function(resultsPerformance) {
   }
   
   row.names(mainDF) <- 1:nrow(mainDF)
-  names(mainDF) <- c("Outcome", "Dependent Variables", "Lawyers", "Fixed Effects", "Adj R^2", names(mainDF)[6:9])
+  names(mainDF) <- c("Outcome", "Dependent Variables", "Lawyers", "Fixed Effects", "Adj R^2", names(mainDF)[6:ncol(mainDF)])
   
   mainDF$Outcome <- gsub("_NoRatio", "", mainDF$Outcome)
   mainDF$Outcome <- gsub("GrossRev", "Gross Rev", mainDF$Outcome)
   mainDF$Outcome <- gsub("_PerLawyer", "/Lawyer", mainDF$Outcome)
   mainDF$Outcome <- gsub(".eqPart", "/Eq Partner", mainDF$Outcome)
   
-  mainDF$`Dependent Variables` <- gsub("Both", "Revenue + Deals", mainDF$`Dependent Variables`)
+  mainDF$`Dependent Variables` <- gsub("Both", "Revenue + Issues", mainDF$`Dependent Variables`)
+  mainDF$`Dependent Variables` <- gsub("Deals", "Issues", mainDF$`Dependent Variables`)
+  
   
   mainDF$Lawyers <- gsub("WithLawyers2", "Lawyers^2", mainDF$Lawyers)
   mainDF$Lawyers <- gsub("WithLawyersLog", "log(Lawyers)", mainDF$Lawyers)
+  mainDF$Lawyers <- gsub("WithLawyers", "Lawyers", mainDF$Lawyers)
   mainDF$Lawyers <- gsub("WithoutLawyers", "No", mainDF$Lawyers)
   
   #printHorizontally(mainDF)
+  # this function actually prints them to the file
   printVertically(mainDF)
   
   
@@ -441,15 +592,75 @@ GeneratePerformanceTable <- function(resultsPerformance) {
   colnames(orderedDF) <- c("Adj.R2", "AIC", "BIC", "CV")
   orderedDF <- data.frame(apply(orderedDF, 2, as.numeric))
   orderedDF <- melt(orderedDF, id="Adj.R2")
-  ggplot(data=orderedDF, aes(x=Adj.R2, y=value)) + geom_line(data=orderedDF,aes(color=variable, alpha=0.2)) + 
-    ggtitle(("AIC, BIC, CV vs. Adj.R^2"))
-  
-  
-  #return(mainDF)
+  #ggplot(data=orderedDF, aes(x=Adj.R2, y=value)) + geom_line(data=orderedDF,aes(color=variable, alpha=0.2)) + 
+    #ggtitle(("AIC, BIC, CV vs. Adj.R^2"))
 }
 #GeneratePerformanceTable(resultsPerformance)
 
 
+
+
+GeneratePValueSummaryTable <- function(resultsPValues) {
+  # + p < 0.10
+  # * p < 0.05
+  # ** p < 0.01
+
+  
+  resultTable <- data.frame(matrix(nrow=nrow(resultsPValues), ncol=5))
+  
+  row.names(resultTable) <- row.names(resultsPValues)
+  row.names(resultTable) <- gsub("Lawyers2", "Lawyers^2", row.names(resultTable))
+  row.names(resultTable) <- gsub("LawyersLog", "log(Lawyers)", row.names(resultTable))
+  row.names(resultTable) <- gsub("Revenue", " Revenue", row.names(resultTable))
+  row.names(resultTable) <- gsub("Issues", " Issues", row.names(resultTable))
+  row.names(resultTable) <- gsub("Issues", " Issues", row.names(resultTable))
+  row.names(resultTable) <- gsub("\\(Intercept\\)", "Intercept", row.names(resultTable))
+  
+  
+  colnames(resultTable) <- c("$p < 0.001$ \\\\ \\# (\\%)", 
+                             "$p < 0.01$ \\\\ \\# (\\%)", "$p < 0.05$ \\\\ \\# (\\%)", 
+                             "$p < 0.10$ \\\\ \\# (\\%)", "\\# Regressions \\\\ ")
+  colnames(resultTable) <- paste("\\multicolumn{1}{p{2.6cm}}{\\centering ", colnames(resultTable), "}", sep="")
+  
+  for (i in 1:nrow(resultsPValues)) {
+    notNA <- resultsPValues[i,!is.na(resultsPValues[i,])]
+    frequency <- length(notNA)
+    
+    # plusSig <- sum((notNA < 0.1) & (notNA>= 0.05))
+    # plusSigPercent <- round(as.numeric(plusSig/frequency)*100,0)
+    # plusSigText <- paste(plusSig, " (", plusSigPercent, "\\%)", sep="")
+    # 
+    # starSig <- sum((notNA < 0.05) & (notNA>= 0.01))
+    # starSigPercent <- round(as.numeric(starSig/frequency)*100,0)
+    # starSigText <- paste(starSig, " (", starSigPercent, "\\%)", sep="")
+    
+    starStarStarSig <- sum(notNA < 0.001)
+    starStarStarSigPercent <- round(as.numeric(starStarStarSig/frequency)*100,0)
+    starStarStarSigText <- paste(starStarStarSig, " (", starStarStarSigPercent, "\\%)", sep="")
+    
+    
+    starStarSig <- sum(notNA < 0.01)
+    starStarSigPercent <- round(as.numeric(starStarSig/frequency)*100,0)
+    starStarSigText <- paste(starStarSig, " (", starStarSigPercent, "\\%)", sep="")
+    
+    
+    sigAtStarOrBetter <- sum(notNA < 0.05)
+    sigAtStarOrBetterPercent <- round(as.numeric(sigAtStarOrBetter/frequency)*100,0)
+    sigAtStarOrBetterText <- paste(sigAtStarOrBetter, " (", sigAtStarOrBetterPercent, "\\%)", sep="")
+    
+    
+    sigAtPlusOrBetter <- sum(notNA < 0.1)
+    sigAtPlusOrBetterPercent <- round(as.numeric(sigAtPlusOrBetter/frequency)*100,0)
+    sigAtPlusOrBetterText <- paste(sigAtPlusOrBetter, " (", sigAtPlusOrBetterPercent, "\\%)", sep="")
+    
+    
+    
+    thisRow <- c(starStarStarSigText, starStarSigText, sigAtStarOrBetterText, sigAtPlusOrBetterText, frequency)
+    resultTable[i,] <- thisRow
+  }
+  return(resultTable)
+}
+#GeneratePValueSummaryTable(resultsPValues)
 
 
 

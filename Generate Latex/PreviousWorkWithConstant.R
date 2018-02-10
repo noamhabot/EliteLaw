@@ -26,14 +26,6 @@ source('Generate Latex/CV.R')
 # Current Analysis
 # -------------------------------------------------------------------------------------------------
 
-# Set the possible Configurations
-modelOutputs = c("GrossRev", "GrossRev.eqPart", "NOI", "NOI.eqPart")
-outputDenominators = c("NoRatio", "PerLawyer")
-firmFixedEffects = c("FirmFE", "NoFirmFE", "Lawyers")
-excludeLawyers = c("WithLawyers2", "WithLawyersLog", "WithoutLawyers")
-fixedEffects = c("FE3", "FE1", "FEYear", "NoFE")
-dealsAndOrRevenues = c("Both", "Revenue", "Deals")
-
 modelOutput = "NOI.eqPart"
 outputDenominator = "NoRatio"
 firmFixedEffect = "NoFirm"
@@ -57,9 +49,9 @@ firms = data.frame(FirmID = as.character(df$FirmID))
 covariates = c("(Intercept)", "Lawyers", "Lawyers2", "LawyersLog", "Leverage",  
                "MnARevenue", "EquityRevenue", "IPORevenue", 
                "MnAIssues", "EquityIssues", "IPOIssues")
-modelAcessment = c('Adj_R_2', 'AIC / 10e+2', 'BIC / 10e+2', 'CV / 10e+7', 'Num Params')
+modelAcessment = c('Adj_R_2', 'AIC / 10e+2', 'BIC / 10e+2', 'CV / 10e+7', 'Params', 'Max VIF')
 
-resultsCoeffs = data.frame(row.names = c(covariates, 'Observations', 'R2', 'Adj R2', 'AIC', 'BIC'))
+resultsCoeffs = data.frame(row.names = c(covariates, 'Observations', 'R2', 'Adj R2', 'AIC', 'BIC', 'CV', 'Params', 'MaxVIF'))
 resultsTValues = data.frame(row.names = covariates)
 resultsPValues = data.frame(row.names = covariates)
 resultsPerformance = data.frame(row.names = modelAcessment)
@@ -76,13 +68,23 @@ nCV = 10
 # Main loop for all models
 #  -------------------------------------------------------------------------------------------------
 
+# Set the possible Configurations
+modelOutputs = c("GrossRev", "GrossRev.eqPart", "NOI", "NOI.eqPart")
+outputDenominators = c("NoRatio", "PerLawyer")
+dealsAndOrRevenues = c("Both", "Revenue", "Deals")
+excludeLawyers = c("WithLawyers", "WithLawyers2", "WithLawyersLog", "WithoutLawyers")
+firmFixedEffects = c("FirmFE", "NoFirmFE", "Lawyers")
+fixedEffects = c("FE3", "FE1", "FEYear", "NoFE")
+
+
+
 # For debugging only--------------------
-dealsAndOrRevenue = dealsAndOrRevenues[1]
-modelOutput = modelOutputs[3]
+modelOutput = modelOutputs[1]
 outputDenominator = outputDenominators[1]
+dealsAndOrRevenue = dealsAndOrRevenues[2]
+excludeLawyer = excludeLawyers[1]
 firmFixedEffect = firmFixedEffects[1]
 fixedEffect = fixedEffects[3]
-excludeLawyer = excludeLawyers[1]
 counter <- 1
 # --------------------------------------
 
@@ -146,14 +148,16 @@ for(modelOutput in modelOutputs) {
             
             
             # Exclude Lawyers if necessary
-            if(excludeLawyer == "WithoutLawyers"){
-              currDf = currDf %>% select(-Lawyers, -Lawyers2, -LawyersLog)
+            if(excludeLawyer == "WithLawyers"){
+              currDf = currDf %>% select(-Lawyers2, -LawyersLog)
             } else if (excludeLawyer == "WithLawyers2"){
               #currDf = currDf %>% select(-LawyersLog)
               currDf = currDf %>% select(-LawyersLog, -Lawyers)
             } else if (excludeLawyer == "WithLawyersLog"){
               #currDf = currDf %>% select(-Lawyers2)
               currDf = currDf %>% select(-Lawyers2, -Lawyers)
+            } else if (excludeLawyer == "WithoutLawyers"){
+              currDf = currDf %>% select(-Lawyers, -Lawyers2, -LawyersLog)
             }
             
             
@@ -167,15 +171,15 @@ for(modelOutput in modelOutputs) {
             
             # Setting the variables regarding the fixed firm effects
             if(firmFixedEffect == "FirmFE"){
-              currDf$FirmID = firms$FirmName
+              currDf$FirmID = firms$FirmID
             } else if(firmFixedEffect == "Lawyers"){
               if(excludeLawyer == "WithoutLawyers"){ 
                 next 
+              } else if (excludeLawyer == "WithLawyers") {
+                currDf = currDf %>% select(Output, Lawyers)
               } else if (excludeLawyer == "WithLawyers2") {
-                #currDf = currDf %>% select(Output, Lawyers, Lawyers2)
                 currDf = currDf %>% select(Output, Lawyers2)
               } else if (excludeLawyer == "WithLawyersLog") {
-                #currDf = currDf %>% select(Output, Lawyers, LawyersLog)
                 currDf = currDf %>% select(Output, LawyersLog)
               }
               
@@ -192,16 +196,26 @@ for(modelOutput in modelOutputs) {
   
             # Run the linear regression
             currModel = lm(Output ~., data = currDf[ , !(names(currDf) %in% c("FirmName"))])
-            
-            vif(currModel)
+            maxVIF <- 0
+            try({
+              thisVIF <- vif(currModel)
+              if (class(thisVIF) == "numeric") {
+                maxVIF <- max(thisVIF)
+              } else {
+                maxVIF <- max(vif(currModel)[,1])
+              }
+            })
 
 
             # Compute the coefficients, TValues and performace metrics
             coeffs = summary(currModel)$coefficients[, 1]
             r2 = round(summary(currModel)$r.squared, 2)
             adjR2 = round(summary(currModel)$adj.r.squared, 2)
-            aic = round(AIC(currModel)/100)
+            aic = round(AIC(currModel)/100) # k+n*(log((2*pi*deviance(currModel))/(n-k))+1)
             bic = round(BIC(currModel)/100)
+            RSS = deviance(currModel)
+            numParams = length(coef(currModel))-1
+            
             #print(resettest(currModel)$p.value)
             if(outputDenominator == "NoRatio" && modelOutput != "NOI.eqPart"){ denom = 10^13} else{ denom = denom = 10^7}
 
@@ -250,7 +264,6 @@ for(modelOutput in modelOutputs) {
                     numDigits = 2
                   }
                   resultsCoeffs[covariate, resultConfig] = round(coeffs[covariate]/denom, digits = numDigits)
-                  #resultsCoeffs[covariate, resultConfig] = round(coeffs[covariate]/1000, digits = 3)
                 } else {
                   resultsCoeffs[covariate, resultConfig] = round(coeffs[covariate], digits = 1)
                 }
@@ -263,14 +276,18 @@ for(modelOutput in modelOutputs) {
             resultsCoeffs['Adj R2', resultConfig] = adjR2
             resultsCoeffs['AIC', resultConfig] = aic
             resultsCoeffs['BIC', resultConfig] = bic
+            resultsCoeffs['CV', resultConfig] = cv
+            resultsCoeffs['Params', resultConfig] = numParams
+            resultsCoeffs['MaxVIF', resultConfig] = maxVIF
+            
             
             
             
 
-            numParams = length(coef(currModel))-1
+            
             
             # Update performance tables
-            resultsPerformance = cbind(resultsPerformance, c(adjR2, aic, bic, cv, numParams))
+            resultsPerformance = cbind(resultsPerformance, c(adjR2, aic, bic, cv, numParams, round(maxVIF,2)))
             names(resultsPerformance)[length(resultsPerformance)] = resultConfig
             
             counter <- counter + 1

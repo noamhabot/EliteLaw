@@ -1,39 +1,43 @@
 % latex table generated in R 3.3.2 by xtable 1.8-2 package
-% Thu Feb  1 21:36:08 2018
+% Fri Feb  9 16:56:49 2018
 \begin{table}[ht]
 \centering
 \begin{tabular}{rlllllllll}
   \hline
- & GrossRev_PerLawyer_Both_WithLawyersLog_FirmFE_FE3 & GrossRev_PerLawyer_Both_WithLawyersLog_FirmFE_FE1 & GrossRev_PerLawyer_Both_WithLawyersLog_FirmFE_FEYear & GrossRev_PerLawyer_Both_WithLawyersLog_FirmFE_NoFE & GrossRev_PerLawyer_Both_WithLawyersLog_NoFirmFE_FE3 & GrossRev_PerLawyer_Both_WithLawyersLog_NoFirmFE_FE1 & GrossRev_PerLawyer_Both_WithLawyersLog_NoFirmFE_FEYear & GrossRev_PerLawyer_Both_WithLawyersLog_NoFirmFE_NoFE & GrossRev_PerLawyer_Both_WithLawyersLog_Lawyers_NoFE \\ 
+ & GrossRev_NoRatio_Deals_WithLawyersLog_FirmFE_FE3 & GrossRev_NoRatio_Deals_WithLawyersLog_FirmFE_FE1 & GrossRev_NoRatio_Deals_WithLawyersLog_FirmFE_FEYear & GrossRev_NoRatio_Deals_WithLawyersLog_FirmFE_NoFE & GrossRev_NoRatio_Deals_WithLawyersLog_NoFirmFE_FE3 & GrossRev_NoRatio_Deals_WithLawyersLog_NoFirmFE_FE1 & GrossRev_NoRatio_Deals_WithLawyersLog_NoFirmFE_FEYear & GrossRev_NoRatio_Deals_WithLawyersLog_NoFirmFE_NoFE & GrossRev_NoRatio_Deals_WithLawyersLog_Lawyers_NoFE \\ 
   \hline
-Intercept & 253.4 & 248.05 & 395.5$^{+}$ & 299.6 & 253.4** & 248.05** & 395.5** & 299.6** & 29.67 \\ 
-  tStat Intercept & (0.303) & (0.314) & (0.096) & (0.217) & (0.000) & (0.000) & (0.000) & (0.000) & (0.739) \\ 
-  Lawyers & -0.1* & -0.1* & -0.1** & -0.11* & -0.1** & -0.1** & -0.1** & -0.11** & 0.03 \\ 
-  tStat Lawyers & (0.013) & (0.014) & (0.004) & (0.012) & (0.000) & (0.000) & (0.000) & (0.000) & (0.198) \\ 
+Intercept & -2386.9** & -2346.5** & -2036** & -2375.3** & -1673.7** & -1703.4** & -1574.5** & -1672.8** & -2444.8** \\ 
+  tStat Intercept & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) \\ 
+  Lawyers &  &  &  &  &  &  &  &  &  \\ 
+  tStat Lawyers &  &  &  &  &  &  &  &  &  \\ 
   Lawyers2 &  &  &  &  &  &  &  &  &  \\ 
   tStat Lawyers2 &  &  &  &  &  &  &  &  &  \\ 
-  LawyersLog * 10^4 & 2.185 & 2.172 & -2.432 & 3.144 & 2.185$^{+}$ & 2.172$^{+}$ & -2.432* & 3.144* & 9.189** \\ 
-  tStat LawyersLog * 10^4 & (0.612) & (0.614) & (0.572) & (0.462) & (0.083) & (0.085) & (0.025) & (0.014) & (0.000) \\ 
-  Leverage & 33.1** & 33.27** & 13.06 & 41.24** & 33.1** & 33.27** & 13.06** & 41.24** &  \\ 
-  tStat Leverage & (0.000) & (0.000) & (0.108) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) &  \\ 
-  MnARevenue & 1.5* & 1.5** & 1.7** & 1.7** & 1.5** & 1.5** & 1.7** & 1.7** &  \\ 
-  tStat MnARevenue & (0.011) & (0.01) & (0.001) & (0.003) & (0.000) & (0.000) & (0.000) & (0.000) &  \\ 
-  EquityRevenue & 0 & 0 & 0.1 & 0.1 & 0 & 0 & 0.1* & 0.1$^{+}$ &  \\ 
-  tStat EquityRevenue & (0.75) & (0.729) & (0.26) & (0.309) & (0.58) & (0.545) & (0.05) & (0.065) &  \\ 
-  IPORevenue & 11.9** & 11.5** & 8.2** & 11.2** & 11.9** & 11.5** & 8.2* & 11.2** &  \\ 
-  tStat IPORevenue & (0.003) & (0.004) & (0.001) & (0.007) & (0.002) & (0.002) & (0.015) & (0.004) &  \\ 
-  MnAIssues & 1235** & 1240.7** & 943.1** & 1361.9** & 1235** & 1240.7** & 943.1** & 1361.9** &  \\ 
-  tStat MnAIssues & (0.003) & (0.003) & (0.008) & (0.002) & (0.000) & (0.000) & (0.000) & (0.000) &  \\ 
-  EquityIssues & 156.6* & 153.5* & 141.8* & 47.9 & 156.6* & 153.5* & 141.8** & 47.9 &  \\ 
-  tStat EquityIssues & (0.034) & (0.038) & (0.046) & (0.565) & (0.013) & (0.015) & (0.009) & (0.451) &  \\ 
-  IPOIssues & -6803.2** & -7071.7** & 1105.1 & -8519.9** & -6803.2** & -7071.7** & 1105.1 & -8519.9** &  \\ 
-  tStat IPOIssues & (0.000) & (0.000) & (0.558) & (0.000) & (0.000) & (0.000) & (0.297) & (0.000) &  \\ 
+  LawyersLog * 10^8 & 4.519** & 4.358** & 3.805** & 4.442** & 3.102** & 3.113** & 2.944** & 3.132** & 4.616** \\ 
+  tStat LawyersLog * 10^8 & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) \\ 
+  Leverage & 12.1 & 16.1$^{+}$ & -2.7 & 16.9$^{+}$ & 17.8** & 18.1** & 8.3** & 21.5** &  \\ 
+  tStat Leverage & (0.156) & (0.063) & (0.757) & (0.051) & (0.000) & (0.000) & (0.000) & (0.000) &  \\ 
+  MnARevenue &  &  &  &  &  &  &  &  &  \\ 
+  tStat MnARevenue &  &  &  &  &  &  &  &  &  \\ 
+  EquityRevenue &  &  &  &  &  &  &  &  &  \\ 
+  tStat EquityRevenue &  &  &  &  &  &  &  &  &  \\ 
+  IPORevenue &  &  &  &  &  &  &  &  &  \\ 
+  tStat IPORevenue &  &  &  &  &  &  &  &  &  \\ 
+  MnAIssues * 10^6 & 2.935** & 2.831** & 2.805** & 2.889** & 3.020** & 3.008** & 2.934** & 3.122** &  \\ 
+  tStat MnAIssues * 10^6 & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) &  \\ 
+  EquityIssues * 10^5 & 2.419* & 1.817 & 2.507* & 1.797 & 3.146** & 2.907** & 3.370** & 2.791** &  \\ 
+  tStat EquityIssues * 10^5 & (0.04) & (0.154) & (0.029) & (0.16) & (0.000) & (0.000) & (0.000) & (0.000) &  \\ 
+  IPOIssues * 10^5 & -34.421* & -39.703** & -14.334 & -37.046* & -47.815** & -49.072** & -9.929 & -54.918** &  \\ 
+  tStat IPOIssues * 10^5 & (0.03) & (0.01) & (0.394) & (0.014) & (0.001) & (0.001) & (0.539) & (0.000) &  \\ 
   Observations & 4978 & 4978 & 4978 & 4978 & 4978 & 4978 & 4978 & 4978 & 4978 \\ 
-  R2 & 0.38 & 0.38 & 0.59 & 0.3 & 0.38 & 0.38 & 0.59 & 0.3 & 0.06 \\ 
-  Adj R2 & 0.38 & 0.38 & 0.59 & 0.3 & 0.38 & 0.38 & 0.59 & 0.3 & 0.06 \\ 
-  AIC & 1362 & 1362 & 1342 & 1368 & 1362 & 1362 & 1342 & 1368 & 1383 \\ 
-  BIC & 1363 & 1363 & 1344 & 1369 & 1363 & 1363 & 1344 & 1369 & 1383 \\ 
+  R2 & 0.88 & 0.88 & 0.9 & 0.88 & 0.79 & 0.78 & 0.82 & 0.78 & 0.67 \\ 
+  Adj R2 & 0.88 & 0.87 & 0.89 & 0.87 & 0.79 & 0.78 & 0.82 & 0.78 & 0.67 \\ 
+  AIC & 1993 & 1996 & 1987 & 1996 & 2017 & 2018 & 2010 & 2020 & 2040 \\ 
+  BIC & 2011 & 2014 & 2007 & 2014 & 2018 & 2019 & 2013 & 2021 & 2040 \\ 
+  CV & 1416 & 1481 & 1250 & 1477 & 2353 & 2385 & 2031 & 2482 & 3653 \\ 
+  Params & 273 & 271 & 302 & 270 & 8 & 6 & 37 & 5 & 1 \\ 
+  MaxVIF & 155.34 & 128.11 & 590.54 & 86.03 & 1.93 & 1.76 & 1.79 & 1.74 & 0.00 \\ 
+  Regression Num & 89 & 90 & 91 & 92 & 93 & 94 & 95 & 96 & 97 \\ 
    \hline
 \end{tabular}
-\caption{Gross Revenue/Lawyer $\sim$ Revenue + Counts (with log(Lawyers))} 
+\caption{Gross Revenue $\sim$ Issues (with log(Lawyers))} 
 \end{table}
