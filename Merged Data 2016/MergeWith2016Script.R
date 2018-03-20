@@ -114,6 +114,9 @@ names(final_ipo_equity_data) = c('Year', 'FirmName', 'Short',
 
 
 
+
+
+
 #M&A data ---------------------------------------------------------------------------------
 mnaDF <- mnaDF %>% select(Year, FirmName, MnA.Revenue, MnA.Rank, MnA.Market.Share, Mna.Num.Of.Deals, Short, MnAHits)
 names(mnaDF) <- c("Year", "FirmName", "MnARevenue", "MnARank", "MnAMarketShare", "MnANumOfDeals", "Short", 'MnAHits')
@@ -126,7 +129,13 @@ names(mnaDF) <- c("Year", "FirmName", "MnARevenue", "MnARank", "MnAMarketShare",
 df <- left_join(amlaw, final_ipo_equity_data %>% select(-FirmName), by=c("Year" = "Year", "Short" = "Short"))
 df <- left_join(df, mnaDF %>% select(-FirmName), by=c("Year" = "Year", "Short" = "Short"))
 df <- df %>% mutate(Lawyers2 = Lawyers^2) 
+df <- df %>% mutate(LawyersLog = log(Lawyers))
 
+
+
+############## Adding the Agg variables (MnA, Equity, IPO) ##############
+
+# Add AggMnA to the dataset
 agg_dealogic_years = c(1988:2016)
 agg_dealogic_values = c(336, 292, 225, 137, 124, 225, 347, 519, 659, 919, 1600, 1750, 1770,
                         757, 448, 524, 875,1300,1560, 1570, 925, 767, 875, 997, 980, 1180,
@@ -134,6 +143,29 @@ agg_dealogic_values = c(336, 292, 225, 137, 124, 225, 347, 519, 659, 919, 1600, 
 agg_dealogic = as.data.frame(cbind(agg_dealogic_years, agg_dealogic_values))
 names(agg_dealogic) = c("Year", "AggMnA")
 df <- left_join(df, agg_dealogic, by="Year")
+
+
+
+# Add AggEquity to the dataset
+# source: https://www.federalreserve.gov/econresdata/releases/corpsecure/corpsecure20090131.htm, Table 1.46 row 8
+equity_federal_reserve <- na.omit(read.xlsx("AggEquity.xlsx", 1))
+df <- left_join(df, equity_federal_reserve, by="Year")
+
+# Add AggIPO to the dataset
+# source: https://site.warrington.ufl.edu/ritter/files/2018/01/IPOs2017Statistics_January17_2018.pdf, Table 1
+aggipo_data <- na.omit(read.xlsx("AggIPO.xlsx", 1))
+df <- left_join(df, aggipo_data, by="Year")
+
+
+################## Add the GDP ##################
+gdpYears <- 1984:2016
+# source: https://www.bea.gov/iTable/iTableHtml.cfm?reqid=19&step=3&isuri=1&1910=x&0=-9&1921=survey&1903=5&1904=1984&1905=2018&1906=a&1911=0
+GDP <- c(4040.7,4346.7,4590.2,4870.2,5252.6,5657.7,5979.6,6174.0,6539.3,6878.7,7308.8,7664.1,
+         8100.2,8608.5,9089.2,9660.6,10284.8,10621.8,10977.5,11510.7,12274.9,13093.7,13855.9,
+         14477.6,14718.6,14418.7,14964.4,15517.9,16155.3,16691.5,17427.6,18120.7,18624.5)
+gdpDF <- data.frame(gdpYears, GDP)
+names(gdpDF) <- c("Year", "GDP")
+df <- left_join(df, gdpDF, by="Year")
 
 
 
@@ -146,11 +178,15 @@ df <- df %>% mutate(EqPartners = EqPartner.Lawyers*Lawyers) %>%
 # rewrite any NA's with 0's
 df[is.na(df)] <- 0
 
+
+#Aggregated M&A
+df <- df %>% group_by(Year) %>% mutate(CumulativeMnA = sum(MnARevenue)) %>% ungroup()
+
 #Aggregated Equity Proceeds
-df <- df %>% group_by(Year) %>% mutate(AggEquity = sum(EquityRevenue)) %>% ungroup()
+df <- df %>% group_by(Year) %>% mutate(CumulativeEquity = sum(EquityRevenue)) %>% ungroup()
 
 #Aggreagated IPO
-df <- df %>% group_by(Year) %>% mutate(AggIPO = sum(IPORevenue))  %>% ungroup()
+df <- df %>% group_by(Year) %>% mutate(CumulativeIPO = sum(IPORevenue))  %>% ungroup()
 
 # Add both GrossRev/Lawyer and GrossRev/EquityPartner
 df <- df %>% mutate(GrossRev.Lawyer = GrossRev/Lawyers, GrossRev.eqPart = GrossRev/EqPartners)
@@ -208,7 +244,6 @@ setwd("~/Google Drive/EliteLaw/Data/")
 save(df, file="EliteLawDf2016.RData")
 
 # write it to a new excel file
-#library("xlsx")
-#write.xlsx(as.data.frame(toWrite), "merged5.xlsx", row.names=FALSE)
-#detach("package:xlsx", unload=TRUE)
+write.xlsx(as.data.frame(df), "2016FirmData.xlsx", row.names=FALSE)
+
 

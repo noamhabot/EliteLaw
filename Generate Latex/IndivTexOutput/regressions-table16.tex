@@ -1,12 +1,12 @@
 % latex table generated in R 3.3.2 by xtable 1.8-2 package
-% Fri Feb  9 16:56:49 2018
+% Wed Mar 14 00:58:35 2018
 \begin{table}[ht]
 \centering
 \begin{tabular}{rllllllll}
   \hline
- & GrossRev_PerLawyer_Both_WithoutLawyers_FirmFE_FE3 & GrossRev_PerLawyer_Both_WithoutLawyers_FirmFE_FE1 & GrossRev_PerLawyer_Both_WithoutLawyers_FirmFE_FEYear & GrossRev_PerLawyer_Both_WithoutLawyers_FirmFE_NoFE & GrossRev_PerLawyer_Both_WithoutLawyers_NoFirmFE_FE3 & GrossRev_PerLawyer_Both_WithoutLawyers_NoFirmFE_FE1 & GrossRev_PerLawyer_Both_WithoutLawyers_NoFirmFE_FEYear & GrossRev_PerLawyer_Both_WithoutLawyers_NoFirmFE_NoFE \\ 
+ & GrossRev_PerLawyer_Both_WithoutLawyers_FirmFE_FE4 & GrossRev_PerLawyer_Both_WithoutLawyers_FirmFE_FE1 & GrossRev_PerLawyer_Both_WithoutLawyers_FirmFE_FEYear & GrossRev_PerLawyer_Both_WithoutLawyers_FirmFE_NoFE & GrossRev_PerLawyer_Both_WithoutLawyers_NoFirmFE_FE4 & GrossRev_PerLawyer_Both_WithoutLawyers_NoFirmFE_FE1 & GrossRev_PerLawyer_Both_WithoutLawyers_NoFirmFE_FEYear & GrossRev_PerLawyer_Both_WithoutLawyers_NoFirmFE_NoFE \\ 
   \hline
-Intercept & 208.21** & 202.41** & -134.09** & 315.33** & 353.32** & 348.56** & 253.71** & 452.05** \\ 
+Intercept & -267.05** & -269.54** & -134.09** & 315.33** & 116.27** & 101.65** & 253.71** & 452.05** \\ 
   tStat Intercept & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) \\ 
   Lawyers &  &  &  &  &  &  &  &  \\ 
   tStat Lawyers &  &  &  &  &  &  &  &  \\ 
@@ -14,30 +14,38 @@ Intercept & 208.21** & 202.41** & -134.09** & 315.33** & 353.32** & 348.56** & 2
   tStat Lawyers2 &  &  &  &  &  &  &  &  \\ 
   LawyersLog &  &  &  &  &  &  &  &  \\ 
   tStat LawyersLog &  &  &  &  &  &  &  &  \\ 
-  Leverage & 76.75** & 77.08** & -16.35** & 95.59** & 28.98** & 29.14** & 4.9$^{+}$ & 37.8** \\ 
-  tStat Leverage & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.075) & (0.000) \\ 
-  MnARevenue & 0.6* & 0.6* & 0.6* & 1** & 1.5** & 1.5** & 1.8** & 1.8** \\ 
-  tStat MnARevenue & (0.039) & (0.037) & (0.016) & (0.001) & (0.000) & (0.000) & (0.000) & (0.000) \\ 
-  EquityRevenue & 0 & 0 & 0.1 & 0.1 & 0 & 0 & 0.1** & 0.1* \\ 
-  tStat EquityRevenue & (0.682) & (0.694) & (0.109) & (0.151) & (0.41) & (0.368) & (0.01) & (0.035) \\ 
-  IPORevenue & 3.9 & 3.6 & 1.1 & 3.9 & 12.5** & 12.2** & 8.9* & 11.9** \\ 
-  tStat IPORevenue & (0.298) & (0.332) & (0.46) & (0.317) & (0.001) & (0.001) & (0.013) & (0.002) \\ 
-  MnAIssues & 1534.6** & 1520.5** & 137.6 & 1926.2** & 806.3** & 816** & 210.5 & 972.6** \\ 
-  tStat MnAIssues & (0.000) & (0.000) & (0.572) & (0.000) & (0.000) & (0.000) & (0.103) & (0.000) \\ 
-  EquityIssues & 151.8** & 147.1* & 0 & 109.6$^{+}$ & 102.1 & 99.2 & 32.1 & 1.3 \\ 
-  tStat EquityIssues & (0.01) & (0.011) & (1) & (0.1) & (0.106) & (0.114) & (0.555) & (0.984) \\ 
-  IPOIssues & -4286.3** & -4514.3** & 993.1 & -2646.6 & -6336.1** & -6626.8** & 1174.2 & -8021.9** \\ 
-  tStat IPOIssues & (0.001) & (0.000) & (0.204) & (0.101) & (0.000) & (0.000) & (0.209) & (0.000) \\ 
-  Observations & 4978 & 4978 & 4978 & 4978 & 4978 & 4978 & 4978 & 4978 \\ 
-  R2 & 0.73 & 0.73 & 0.91 & 0.68 & 0.37 & 0.37 & 0.57 & 0.29 \\ 
-  Adj R2 & 0.71 & 0.71 & 0.91 & 0.67 & 0.37 & 0.37 & 0.57 & 0.29 \\ 
-  AIC & 1327 & 1327 & 1269 & 1334 & 1362 & 1363 & 1344 & 1369 \\ 
-  BIC & 1345 & 1344 & 1289 & 1352 & 1363 & 1363 & 1347 & 1369 \\ 
-  CV & 2176 & 2172 & 683 & 2491 & 4528 & 4529 & 3106 & 5121 \\ 
-  Params & 275 & 273 & 304 & 272 & 10 & 8 & 39 & 7 \\ 
-  MaxVIF & 92.83 & 77.72 & 214.27 & 53.46 & 2.44 & 2.43 & 2.44 & 2.43 \\ 
+  Leverage & -12.92** & -12.69** & -16.35** & 95.59** & 4.98$^{+}$ & 6.17* & 4.9$^{+}$ & 37.8** \\ 
+  tStat Leverage & (0.003) & (0.004) & (0.000) & (0.000) & (0.076) & (0.027) & (0.075) & (0.000) \\ 
+  MnA Deal Value & 0.5* & 0.6* & 0.6* & 1** & 1.8** & 1.7** & 1.8** & 1.8** \\ 
+  tStat MnA Deal Value & (0.031) & (0.025) & (0.016) & (0.001) & (0.000) & (0.000) & (0.000) & (0.000) \\ 
+  Equity Deal Value & 0.1$^{+}$ & 0 & 0.1 & 0.1 & 0.1* & 0.1$^{+}$ & 0.1** & 0.1* \\ 
+  tStat Equity Deal Value & (0.074) & (0.177) & (0.109) & (0.151) & (0.014) & (0.056) & (0.01) & (0.035) \\ 
+  IPO Deal Value & 0.6 & 1.6 & 1.1 & 3.9 & 8.8* & 9.3** & 8.9* & 11.9** \\ 
+  tStat IPO Deal Value & (0.729) & (0.297) & (0.46) & (0.317) & (0.015) & (0.009) & (0.013) & (0.002) \\ 
+  MnA Transactions & 291.7 & 235.3 & 137.6 & 1926.2** & 213$^{+}$ & 257* & 210.5 & 972.6** \\ 
+  tStat MnA Transactions & (0.172) & (0.31) & (0.572) & (0.000) & (0.096) & (0.048) & (0.103) & (0.000) \\ 
+  Equity Transactions & 15.3 & 35.7 & 0 & 109.6$^{+}$ & 36.3 & 66.6 & 32.1 & 1.3 \\ 
+  tStat Equity Transactions & (0.568) & (0.2) & (1) & (0.1) & (0.503) & (0.225) & (0.555) & (0.984) \\ 
+  IPO Transactions & 450.3 & 214.9 & 993.1 & -2646.6 & 1205.4 & 614.3 & 1174.2 & -8021.9** \\ 
+  tStat IPO Transactions & (0.537) & (0.754) & (0.204) & (0.101) & (0.192) & (0.5) & (0.209) & (0.000) \\ 
+  Agg MnA & -22** &  &  &  & -44.8** &  &  &  \\ 
+  tStat Agg MnA & (0.000) &  &  &  & (0.000) &  &  &  \\ 
+  Agg Equity & 28.5 &  &  &  & -154.3** &  &  &  \\ 
+  tStat Agg Equity & (0.284) &  &  &  & (0.007) &  &  &  \\ 
+  Agg IPO & 4 &  &  &  & 78.2 &  &  &  \\ 
+  tStat Agg IPO & (0.969) &  &  &  & (0.787) &  &  &  \\ 
+  GDP & 50.5** & 49.2** &  &  & 41.2** & 36.6** &  &  \\ 
+  tStat GDP & (0.000) & (0.000) &  &  & (0.000) & (0.000) &  &  \\ 
+  Observations & 4665 & 4978 & 4978 & 4978 & 4665 & 4978 & 4978 & 4978 \\ 
+  R2 & 0.91 & 0.91 & 0.91 & 0.68 & 0.53 & 0.56 & 0.57 & 0.29 \\ 
+  Adj R2 & 0.91 & 0.9 & 0.91 & 0.67 & 0.53 & 0.56 & 0.57 & 0.29 \\ 
+  AIC & 1189 & 1272 & 1269 & 1334 & 1262 & 1344 & 1344 & 1369 \\ 
+  BIC & 1207 & 1290 & 1289 & 1352 & 1262 & 1345 & 1347 & 1369 \\ 
+  CV & NA & NA & NA & NA & NA & NA & NA & NA \\ 
+  Params & 276 & 273 & 304 & 272 & 11 & 8 & 39 & 7 \\ 
+  MaxVIF & 5.11 & 4.94 & 5.15 & 3.61 & 2.52 & 2.43 & 2.44 & 2.43 \\ 
   Regression Num & 133 & 134 & 135 & 136 & 137 & 138 & 139 & 140 \\ 
    \hline
 \end{tabular}
-\caption{Gross Revenue/Lawyer $\sim$ Revenue + Issues (without Lawyers)} 
+\caption{Gross Revenue/Lawyer $\sim$ Deal Value + Transactions (without Lawyers)} 
 \end{table}

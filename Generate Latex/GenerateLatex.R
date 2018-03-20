@@ -110,7 +110,7 @@ GenerateRegressionTables <- function(resultsCoeffs,resultsTValues, resultsPValue
   outputDenominators = c("NoRatio", "PerLawyer")
   excludeLawyers = c("WithLawyers", "WithLawyers2", "WithLawyersLog", "WithoutLawyers")
   firmFixedEffects = c("FirmFE", "NoFirmFE", "Lawyers")
-  fixedEffects = c("FE3", "FE1", "FEYear", "NoFE")
+  fixedEffects = c("FE4", "FE1", "FEYear", "NoFE")
   dealsAndOrRevenues = c("Both", "Revenue", "Deals")
   
   # we do the subtraction because NOI.eqPart should not have the PerLawyer attached to it.
@@ -199,11 +199,11 @@ GenerateRegressionTables <- function(resultsCoeffs,resultsTValues, resultsPValue
           }
           
           if (dealsAndOrRevenue == "Both") {
-            caption <- paste(caption, " $\\sim$ Revenue + Issues", sep="")
+            caption <- paste(caption, " $\\sim$ Deal Value + Transactions", sep="")
           } else if (dealsAndOrRevenue == "Deals") {
-            caption <- paste(caption, " $\\sim$ Issues", sep="")
+            caption <- paste(caption, " $\\sim$ Transactions", sep="")
           } else if (dealsAndOrRevenue == "Revenue") {
-            caption <- paste(caption, " $\\sim$ Revenue", sep="")
+            caption <- paste(caption, " $\\sim$ Deal Value", sep="")
           }
           
           if (excludeLawyer == "WithoutLawyers") {
@@ -215,6 +215,11 @@ GenerateRegressionTables <- function(resultsCoeffs,resultsTValues, resultsPValue
           } else if (excludeLawyer == "WithLawyers") {
             caption <- paste(caption, " (with Lawyers)", sep="")
           }
+          
+          row.names(thisTable) <- gsub("Issues", " Transactions", row.names(thisTable))
+          row.names(thisTable) <- gsub("Revenue", " Deal Value", row.names(thisTable))
+          row.names(thisTable) <- gsub("Agg", "Agg ", row.names(thisTable))
+          
           print(paste(counter, modelOutput, outputDenominator, dealsAndOrRevenue, excludeLawyer))
           tables[[counter]] <- xtable(thisTable, caption=caption)
           counter <- counter + 1
@@ -236,8 +241,19 @@ GenerateRegressionTables <- function(resultsCoeffs,resultsTValues, resultsPValue
 GenerateSummaryStatistics <- function(df) {
   answer <- data.frame(matrix(NA, nrow = 6, ncol = 0))
   numeric <- df[, sapply(df, is.numeric)]
-  numeric <- numeric[, -grep("Hits", colnames(numeric))] # get rid of Hits variables
-  numeric <- numeric[, -grep("FirmID", colnames(numeric))] # get rid of Hits variables
+  
+  # Multiply all of the Agg values by 1,000 so they are in the same units as Cumulative
+  # numeric$AggMnA <- numeric$AggMnA*1000
+  # numeric$AggEquity <- numeric$AggEquity*1000
+  # numeric$AggIPO <- numeric$AggIPO*1000
+  
+  # columns to get rid of!
+  ridOfColumns <- c("Hits", "FirmID", "Cumulative", "MarketShare", "Rank")
+  for (c in ridOfColumns) {
+    numeric <- numeric[, -grep(c, colnames(numeric))] # get rid of columns with "c" in it
+  }
+  
+  
   #numeric <- numeric[, c(1:3, 5, 7, 6, 4, 8:ncol(numeric))]
   names(numeric) <- gsub(".eqPart", "/Eq Partner", names(numeric))
   names(numeric) <- gsub(".Lawyer", "/Lawyer", names(numeric))
@@ -264,6 +280,8 @@ GenerateSummaryStatistics <- function(df) {
       vec <- as.character(round(as.numeric(vec)))
     } else if (name == "Leverage") {
       vec <- prettyNum(vec,big.mark=",",scientific=FALSE, trim=TRUE, digits=4)
+    } else if (name == "LawyersLog") {
+      vec <- prettyNum(vec,big.mark=",",scientific=FALSE, trim=TRUE, digits=4)
     } else {
       vec <- prettyNum(vec,big.mark=",",scientific=FALSE, trim=TRUE, digits=0)
     }
@@ -279,17 +297,20 @@ GenerateSummaryStatistics <- function(df) {
   names(answer) <- gsub(".eqPart", "/Eq Partners", names(answer))
   names(answer) <- gsub("EqPartners", "Eq Partners", names(answer))
   names(answer) <- gsub(".Lawyer", "/Lawyer", names(answer))
+  names(answer) <- gsub("LawyersLog", "log(Lawyers)", names(answer))
   names(answer) <- gsub("MnA", "MnA ", names(answer))
   names(answer) <- gsub("Equity", "Equity ", names(answer))
   names(answer) <- gsub("IPO", "IPO ", names(answer))
   names(answer) <- gsub("Agg", "Agg ", names(answer))
   names(answer) <- gsub("Rank", " Rank", names(answer))
   names(answer) <- gsub("Revenue", "Rev", names(answer))
-  #names(answer) <- gsub("Issues", "Count", names(answer))
-  names(answer) <- gsub("NumOfDeals", "Issues", names(answer))
+  names(answer) <- gsub("Issues", " Transactions", names(answer))
+  names(answer) <- gsub("NumOfDeals", "Transactions", names(answer))
+  names(answer) <- gsub("MarketShare", "Market Share", names(answer))
+
   
   # add units in parenthesis
-  names(answer) <- gsub("Leverage", "Leverage (ratio)", names(answer))
+  names(answer) <- gsub("Leverage", "Leverage ((Lawyers - Eq Partners)/Eq Partners)", names(answer))
   names(answer) <- gsub("^Gross Rev$", "Gross Rev (US\\\\$)", names(answer))
   names(answer) <- gsub("^Gross Rev/Lawyer$", "Gross Rev/Lawyer (US\\\\$/Lawyer)", names(answer))
   names(answer) <- gsub("^Gross Rev/Eq Partner$", "Gross Rev/Eq Partner (US\\\\$/Eq Partner)", names(answer))
@@ -297,12 +318,18 @@ GenerateSummaryStatistics <- function(df) {
   names(answer) <- gsub("^NOI/Lawyer$", "NOI/Lawyer (US\\\\$/Lawyer)", names(answer))
   names(answer) <- gsub("^NOI/Eq Partner$", "NOI/Eq Partner (US\\\\$/Eq Partner)", names(answer))
   
-  names(answer) <- gsub("^MnA Rev$", "MnA Rev (US\\\\$Millions)", names(answer))
+  names(answer) <- gsub("^MnA Rev$", "MnA Deal Value (US\\\\$Millions)", names(answer))
   names(answer) <- gsub("^Agg MnA $", "Agg MnA (US\\\\$Millions)", names(answer))
-  names(answer) <- gsub("^Equity Rev$", "Equity Rev (US\\\\$Millions)", names(answer))
+  names(answer) <- gsub("^Equity Rev$", "Equity Deal Value (US\\\\$Millions)", names(answer))
   names(answer) <- gsub("^Agg Equity $", "Agg Equity (US\\\\$Millions)", names(answer))
-  names(answer) <- gsub("^IPO Rev$", "IPO Rev (US\\\\$Millions)", names(answer))
+  names(answer) <- gsub("^IPO Rev$", "IPO Deal Value (US\\\\$Millions)", names(answer))
   names(answer) <- gsub("^Agg IPO $", "Agg IPO (US\\\\$Millions)", names(answer))
+  
+  names(answer) <- gsub("^CumulativeMnA $", "MnA Cumulative Deal Value (US\\\\$Millions)", names(answer))
+  names(answer) <- gsub("^CumulativeEquity $", "Equity Cumulative Deal Value (US\\\\$Millions)", names(answer))
+  names(answer) <- gsub("^CumulativeIPO $", "IPO Cumulative Deal Value (US\\\\$Millions)", names(answer))
+  
+  names(answer) <- gsub("^GDP$", "GDP (US\\\\$Billions)", names(answer))
 
   
   
@@ -313,9 +340,21 @@ GenerateSummaryStatistics <- function(df) {
 }
 #View(GenerateSummaryStatistics(df))
 
+GenerateAggVarSummary <- function(df) {
+  thisDF <- data.frame(df %>% select(AggMnA,AggEquity,AggIPO,Year) %>% group_by(Year) %>% filter(row_number() == 1) %>% arrange((Year)))
+  
+  thisDF[thisDF$AggMnA==0,]$AggMnA <- NA
+  thisDF <- thisDF %>% mutate("$\\frac{AggMnA}{AggEquity}$"=AggMnA/AggEquity, "$\\frac{AggMnA}{AggIPO$}"=AggMnA/AggIPO, 
+                              "$\\frac{AggIPO}{AggEquity}$"=AggIPO/AggEquity, "$\\frac{AggIPO}{AggMnA}$"=AggIPO/AggMnA, 
+                              "$\\frac{AggEquity}{AggMnA}$"=AggEquity/AggMnA, "$\\frac{AggEquity}{AggIPO}$"=AggEquity/AggIPO)
+  
+  row.names(thisDF) <- thisDF$Year
+  thisDF <- thisDF %>% select(-Year)
+  return(thisDF)
+}
 
 
-GenerateCorrelations <- function(df) {
+GenerateAndSaveCorrelations <- function(df) {
   numeric <- df[, sapply(df, is.numeric)]
   #numeric$RevPLawyer <- numeric$GrossRevenue/numeric$Lawyers
   #numeric$NOIPLawyer <- numeric$NOI/numeric$Lawyers
@@ -323,22 +362,30 @@ GenerateCorrelations <- function(df) {
                               NOI, NOI.Lawyer, NOI.eqPart,
                               Lawyers, Leverage, EqPartners,
                               MnARevenue, EquityRevenue, IPORevenue,
-                              MnANumOfDeals, EquityIssues, IPOIssues)
+                              MnANumOfDeals, EquityIssues, IPOIssues, GDP)
   
   names(corDF) <- gsub("GrossRev", "Gross Rev", names(corDF))
   names(corDF) <- gsub(".eqPart", "/Eq Partner", names(corDF))
   names(corDF) <- gsub(".Lawyer", "/Lawyer", names(corDF))
-  names(corDF) <- gsub("MnA", "M&A ", names(corDF))
+  names(corDF) <- gsub("EqPartner", "Eq Partner", names(corDF))
+  names(corDF) <- gsub("MnA", "MnA ", names(corDF))
   names(corDF) <- gsub("Equity", "Equity ", names(corDF))
   names(corDF) <- gsub("IPO", "IPO ", names(corDF))
-  names(corDF) <- gsub("NumOfDeals", "Issues", names(corDF))
+  names(corDF) <- gsub("NumOfDeals", "Transactions", names(corDF))
+  names(corDF) <- gsub("Issues", "Transactions", names(corDF))
+  names(corDF) <- gsub("Revenue", "Deal Value", names(corDF))
   
   corDF <- round(cor(corDF),3) # the journal uses 3 significant figures
   row.names(corDF) <- paste(row.names(corDF), " (", 1:nrow(corDF), ")", sep="")
-  colnames(corDF) <- paste("(", 1:15, ")", sep="")
   
-  return (corDF)
+  parenthesis <- paste("(", 1:nrow(corDF), ")", sep="")
+  colnames(corDF) <- parenthesis
+  
+  print(xtable(corDF, digits=3), file="IndivTexOutput/corrTable.tex")
+  
+  #return (corDF)
 }
+GenerateAndSaveCorrelations(df)
 
 
 
@@ -420,67 +467,125 @@ GenerateCorrelationsByRank <- function(df) {
 }
 
 
-# SaveCorrelationsByRankPlots <- function(df, correlRanks) {
-#   
-#   outcomes <- c("Rev", "Rev.Lawyer", "Rev.EqPart", "NOI", "NOI.Lawyer", "NOI.EqPart")
-#   
-#   outcomeText <- gsub(".EqPart", "/Eq Partner", outcomes)
-#   outcomeText <- gsub(".Lawyer", "/Lawyer", outcomeText)
-#   outcomeText <- gsub("Rev", "Gross Rev", outcomeText)
-#   
-#   
-#   for (i in 1:length(outcomes)) {
-#     outcome <- outcomes[i]
-#     subset <- names(correlRanks)[grepl(outcome, names(correlRanks))]
-#     if (outcome == "Rev" || outcome == "NOI") {
-#       subset <- subset[!grepl(".EqPart", subset)]
-#       subset <- subset[!grepl(".Lawyer", subset)]
-#     }
-#     subset <- c("Year", "AggMnA", "GDP", subset)
-#     
-#     
-#     
-#     thisDF <- correlRanks[,subset]
-#     # remove .Rev etc. from the name of the column
-#     names(thisDF) <- gsub(paste(".",outcome,sep=""), "", names(thisDF))
-#     
-#     # replace all the rank columns with their correlations
-#     #thisDF[,grepl("Rank", names(thisDF))]
-#     #grepl("Rank", names(thisDF))
-#     thisDF[,grepl("Rank", names(thisDF))] <- sapply(thisDF[,grepl("Rank", names(thisDF))], function(x) (x-thisDF$GDP)/max(thisDF$GDP) )
-#     
-#     
-#     fac <- max(thisDF) * 1.6 / max(correlRanks$AggMnA)
-#     
-#     #fac <- 3000
-#     thisDF$GDP <- thisDF$GDP*fac
-#     #thisDF$AggMnA <- thisDF$AggMnA*fac
-#     
-#     # create the plotting data frame
-#     plotDF <- melt(thisDF, id="Year")
-#     # add the linetypes
-#     plotDF$lt <- rep("dotdash", nrow(plotDF))
-#     # change AggMnA to different line style
-#     plotDF$lt[plotDF$variable == "AggMnA"] <- "solid"
-#     plotDF$lt[plotDF$variable == "GDP"] <- "solid"
-#     
-#     p <- ggplot(data=plotDF, aes(x=Year, y=value, color=variable, linetype=lt)) + geom_line() + 
-#       labs(title = paste("Ranked Firms by", outcomeText[i]), x="Year", y=outcomeText[i]) +
-#       scale_linetype_discrete(guide=FALSE) + scale_color_discrete(name="Variable") + theme_bw() +
-#       scale_y_continuous(sec.axis = sec_axis(~./fac, name = "Agg M&A, GDP (in millions)"))
-#     show(p)
-#     #ltlegend <- c("dotdash", "dotdash", rep("solid", length(unique(plotDF$variable))-2))
-#     #ggplot(data=plotDF, aes(x=Year, y=value, color=variable, linetype=lt)) + geom_line() + 
-#       # labs(title = paste("Ranked Firms by", outcomeText[i]), x="Year", y=outcomeText[i]) +
-#       # scale_color_manual(name="Variable", values=unique(plotDF$variable)) +
-#       # scale_linetype_manual(name="Variable", values=ltlegend) +
-#       # scale_y_continuous(sec.axis = sec_axis(~./fac, name = "Agg M&A, GDP (in millions)"))
-#     
-#     #graphName <- paste("IndivTexOutput/MnAGDP-", i, ".jpg", sep="")
-#     #ggsave(graphName, p)
-#   }
-# }
-# SaveCorrelationsByRankPlots(df, correlRanks)
+SaveCorrelationsByRankPlots <- function(df, correlRanks) {
+
+  outcomes <- c("Rev", "Rev.Lawyer", "Rev.EqPart", "NOI", "NOI.Lawyer", "NOI.EqPart")
+  
+  outcomeText <- gsub(".EqPart", "/Eq Partner", outcomes)
+  outcomeText <- gsub(".Lawyer", "/Lawyer", outcomeText)
+  outcomeText <- gsub("Rev", "Gross Rev", outcomeText)
+
+
+  for (i in 1:length(outcomes)) {
+    outcome <- outcomes[i]
+    subset <- names(correlRanks)[grepl(outcome, names(correlRanks))]
+    if (outcome == "Rev" || outcome == "NOI") {
+      subset <- subset[!grepl(".EqPart", subset)]
+      subset <- subset[!grepl(".Lawyer", subset)]
+    }
+    subset <- c("Year", "AggMnA", "GDP", subset)
+
+
+
+    thisDF <- correlRanks[,subset]
+    # remove .Rev etc. from the name of the column
+    names(thisDF) <- gsub(paste(".",outcome,sep=""), "", names(thisDF))
+
+    # replace all the rank columns with their correlations
+    #thisDF[,grepl("Rank", names(thisDF))]
+    #grepl("Rank", names(thisDF))
+    yAxis <- outcomeText[i]
+    if (outcome == "Rev" || outcome == "NOI") {
+      # yAxis <- paste(outcomeText[i], "(US$Millions)")
+      # thisDF[,grepl("Rank", names(thisDF))] <- sapply(thisDF[,grepl("Rank", names(thisDF))], function(x) (x/1000000) )
+      # secondAxisGDP <- sec_axis(~.*10, name = "GDP (US$Billions)")
+      # secondAxisAggMnA <- sec_axis(~., name = "Agg M&A (US$Billions)")
+      yAxis <- paste("Log(changes) of",outcomeText[i])
+      #thisDF[,grepl("Rank", names(thisDF))] <- sapply(thisDF[,grepl("Rank", names(thisDF))], function(x) (x/1000000) )
+      secondAxisGDP <- sec_axis(~., name = "Log(changes GDP)")
+      secondAxisAggMnA <- sec_axis(~., name = "Log(changes Agg M&A)")
+    } else if (outcome == "Rev.Lawyer" || outcome == "NOI.Lawyer") {
+      yAxis <- paste(outcomeText[i], "(Thousands US$/Person)")
+      thisDF[,grepl("Rank", names(thisDF))] <- sapply(thisDF[,grepl("Rank", names(thisDF))], function(x) (x/1000) )
+      secondAxisGDP <- sec_axis(~.*10000, name = "GDP (US$Millions)")
+      secondAxisAggMnA <- sec_axis(~.*1000, name = "Agg M&A (US$Millions)")
+    } else if (outcome == "Rev.EqPart" || outcome == "NOI.EqPart") {
+      yAxis <- paste(outcomeText[i], "(Thousands US$/Person)")
+      thisDF[,grepl("Rank", names(thisDF))] <- sapply(thisDF[,grepl("Rank", names(thisDF))], function(x) (x/1000) )
+      thisDF$GDP <- thisDF$GDP*4
+      secondAxisGDP <- sec_axis(~.*(10000/4), name = "GDP (US$Millions)")
+      thisDF$AggMnA <- thisDF$AggMnA*4
+      secondAxisAggMnA <- sec_axis(~.*(1000/4), name = "Agg M&A (US$Millions)")
+    }
+    names(thisDF) <- gsub("Rank", "Top ", names(thisDF))
+    
+    
+    # get the difference of the logs
+    # log(rev_t) - log(rev_{t-1})
+    thisDF[,2:ncol(thisDF)] <- apply(thisDF[,2:ncol(thisDF)], 2, log)
+    thisDF[thisDF==-Inf] <- 0
+    thisDF <- data.frame(cbind(thisDF$Year[2:nrow(thisDF)],apply(thisDF[,2:ncol(thisDF)], 2, diff)))
+    names(thisDF)[1] <- "Year"
+    thisDF$AggMnA[4] <- 0
+    
+    # for (j in 2:ncol(thisDF)) {
+    #   differences <- diff(thisDF[,j])
+    #   sign <- differences<0
+    #   lDifferences <- logb(abs(differences), 10)
+    #   lDifferences[lDifferences==-Inf] <- 0
+    #   lDifferences[sign] <- -lDifferences[sign]
+    #   thisDF[,j] <- c(NA,lDifferences)
+    # }
+    # thisDF <- thisDF[-1,]
+   
+
+    
+    ############################################################################
+    ########## first generate the GDP correlation graph #######################
+    
+    # create the plotting data frame
+    plotDF <- melt(thisDF[,!names(thisDF)%in%c("AggMnA")], id="Year")
+    plotDF$lt <- rep("dash", nrow(plotDF))
+    plotDF$lt[plotDF$variable == "GDP"] <- "solid"
+    
+    
+    p1 <- ggplot(data=plotDF, aes(x=Year, y=value, color=variable, linetype=lt)) + geom_line() +
+      labs(title = paste("Log(changes) of", outcomeText[i],"within top K firms (GDP)"), x="Year", y=yAxis) +
+      scale_linetype_discrete(guide=FALSE) + scale_color_discrete(name="Variable") + theme_bw() +
+      scale_y_continuous(sec.axis = secondAxisGDP)
+    show(p1)
+    ############################################################################
+    
+    
+    ############################################################################
+    ########## now generate the AggM&A correlation graph #######################
+    
+    # create the plotting data frame
+    plotDF <- melt(thisDF[,!names(thisDF)%in%c("GDP")], id="Year")
+    plotDF$lt <- rep("dash", nrow(plotDF))
+    plotDF$lt[plotDF$variable == "AggMnA"] <- "solid"
+
+    p2 <- ggplot(data=plotDF, aes(x=Year, y=value, color=variable, linetype=lt)) + geom_line() +
+      labs(title = paste("Log(changes) of", outcomeText[i],"within top K firms (Agg M&A)"), x="Year", y=yAxis) +
+      scale_linetype_discrete(guide=FALSE) + scale_color_discrete(name="Variable") + theme_bw() +
+      scale_y_continuous(sec.axis = secondAxisAggMnA)
+    show(p2)
+    ############################################################################
+
+
+    # fileNum <- ((i*4)-1)
+    # if (fileNum < 10) {
+    #   fileNum <- paste("0", fileNum, sep="")
+    # }
+    # ggsave(paste("IndivTexOutput/MnAGDP-", fileNum, ".jpg", sep=""), p3, width = 12, height = 9)
+    # fileNum <- ((i*4))
+    # if (fileNum < 10) {
+    #   fileNum <- paste("0", fileNum, sep="")
+    # }
+    # ggsave(paste("IndivTexOutput/MnAGDP-", fileNum, ".jpg", sep=""), p4, width = 12, height = 9)
+  }
+}
+#SaveCorrelationsByRankPlots(df, correlRanks)
 
 
 printHorizontally <- function(mainDF) {
@@ -571,8 +676,9 @@ GeneratePerformanceTable <- function(resultsPerformance) {
   mainDF$Outcome <- gsub("_PerLawyer", "/Lawyer", mainDF$Outcome)
   mainDF$Outcome <- gsub(".eqPart", "/Eq Partner", mainDF$Outcome)
   
-  mainDF$`Dependent Variables` <- gsub("Both", "Revenue + Issues", mainDF$`Dependent Variables`)
-  mainDF$`Dependent Variables` <- gsub("Deals", "Issues", mainDF$`Dependent Variables`)
+  mainDF$`Dependent Variables` <- gsub("Both", "Deal Value + Transactions", mainDF$`Dependent Variables`)
+  mainDF$`Dependent Variables` <- gsub("Deals", "Transactions", mainDF$`Dependent Variables`)
+  mainDF$`Dependent Variables` <- gsub("Revenue", "Deal Value", mainDF$`Dependent Variables`)
   
   
   mainDF$Lawyers <- gsub("WithLawyers2", "Lawyers^2", mainDF$Lawyers)
@@ -598,9 +704,44 @@ GeneratePerformanceTable <- function(resultsPerformance) {
 #GeneratePerformanceTable(resultsPerformance)
 
 
+constructRow <- function(notNA) {
+  frequency <- length(notNA)
+  
+  # plusSig <- sum((notNA < 0.1) & (notNA>= 0.05))
+  # plusSigPercent <- round(as.numeric(plusSig/frequency)*100,0)
+  # plusSigText <- paste(plusSig, " (", plusSigPercent, "\\%)", sep="")
+  # 
+  # starSig <- sum((notNA < 0.05) & (notNA>= 0.01))
+  # starSigPercent <- round(as.numeric(starSig/frequency)*100,0)
+  # starSigText <- paste(starSig, " (", starSigPercent, "\\%)", sep="")
+  
+  starStarStarSig <- sum(notNA < 0.001)
+  starStarStarSigPercent <- round(as.numeric(starStarStarSig/frequency)*100,0)
+  starStarStarSigText <- paste(starStarStarSig, " (", starStarStarSigPercent, "\\%)", sep="")
+  
+  
+  starStarSig <- sum(notNA < 0.01)
+  starStarSigPercent <- round(as.numeric(starStarSig/frequency)*100,0)
+  starStarSigText <- paste(starStarSig, " (", starStarSigPercent, "\\%)", sep="")
+  
+  
+  sigAtStarOrBetter <- sum(notNA < 0.05)
+  sigAtStarOrBetterPercent <- round(as.numeric(sigAtStarOrBetter/frequency)*100,0)
+  sigAtStarOrBetterText <- paste(sigAtStarOrBetter, " (", sigAtStarOrBetterPercent, "\\%)", sep="")
+  
+  
+  sigAtPlusOrBetter <- sum(notNA < 0.1)
+  sigAtPlusOrBetterPercent <- round(as.numeric(sigAtPlusOrBetter/frequency)*100,0)
+  sigAtPlusOrBetterText <- paste(sigAtPlusOrBetter, " (", sigAtPlusOrBetterPercent, "\\%)", sep="")
+  
+  
+  
+  thisRow <- c(starStarStarSigText, starStarSigText, sigAtStarOrBetterText, sigAtPlusOrBetterText, frequency)
+  return(thisRow)
+}
 
 
-GeneratePValueSummaryTable <- function(resultsPValues) {
+GeneratePValueSummaryTable <- function(resultsPValues, yearPValues, firmPValues) {
   # + p < 0.10
   # * p < 0.05
   # ** p < 0.01
@@ -611,58 +752,43 @@ GeneratePValueSummaryTable <- function(resultsPValues) {
   row.names(resultTable) <- row.names(resultsPValues)
   row.names(resultTable) <- gsub("Lawyers2", "Lawyers^2", row.names(resultTable))
   row.names(resultTable) <- gsub("LawyersLog", "log(Lawyers)", row.names(resultTable))
-  row.names(resultTable) <- gsub("Revenue", " Revenue", row.names(resultTable))
-  row.names(resultTable) <- gsub("Issues", " Issues", row.names(resultTable))
-  row.names(resultTable) <- gsub("Issues", " Issues", row.names(resultTable))
+  row.names(resultTable) <- gsub("Revenue", " Deal Value", row.names(resultTable))
+  row.names(resultTable) <- gsub("Issues", " Transactions", row.names(resultTable))
   row.names(resultTable) <- gsub("\\(Intercept\\)", "Intercept", row.names(resultTable))
+  row.names(resultTable) <- gsub("Agg", "Agg ", row.names(resultTable))
   
   
   colnames(resultTable) <- c("$p < 0.001$ \\\\ \\# (\\%)", 
-                             "$p < 0.01$ \\\\ \\# (\\%)", "$p < 0.05$ \\\\ \\# (\\%)", 
-                             "$p < 0.10$ \\\\ \\# (\\%)", "\\# Regressions \\\\ ")
+                             "$**:p < 0.01$ \\\\ \\# (\\%)", "$*:p < 0.05$ \\\\ \\# (\\%)", 
+                             "$+:p < 0.10$ \\\\ \\# (\\%)", "\\# Regressions \\\\ ")
   colnames(resultTable) <- paste("\\multicolumn{1}{p{2.6cm}}{\\centering ", colnames(resultTable), "}", sep="")
   
   for (i in 1:nrow(resultsPValues)) {
     notNA <- resultsPValues[i,!is.na(resultsPValues[i,])]
-    frequency <- length(notNA)
-    
-    # plusSig <- sum((notNA < 0.1) & (notNA>= 0.05))
-    # plusSigPercent <- round(as.numeric(plusSig/frequency)*100,0)
-    # plusSigText <- paste(plusSig, " (", plusSigPercent, "\\%)", sep="")
-    # 
-    # starSig <- sum((notNA < 0.05) & (notNA>= 0.01))
-    # starSigPercent <- round(as.numeric(starSig/frequency)*100,0)
-    # starSigText <- paste(starSig, " (", starSigPercent, "\\%)", sep="")
-    
-    starStarStarSig <- sum(notNA < 0.001)
-    starStarStarSigPercent <- round(as.numeric(starStarStarSig/frequency)*100,0)
-    starStarStarSigText <- paste(starStarStarSig, " (", starStarStarSigPercent, "\\%)", sep="")
-    
-    
-    starStarSig <- sum(notNA < 0.01)
-    starStarSigPercent <- round(as.numeric(starStarSig/frequency)*100,0)
-    starStarSigText <- paste(starStarSig, " (", starStarSigPercent, "\\%)", sep="")
-    
-    
-    sigAtStarOrBetter <- sum(notNA < 0.05)
-    sigAtStarOrBetterPercent <- round(as.numeric(sigAtStarOrBetter/frequency)*100,0)
-    sigAtStarOrBetterText <- paste(sigAtStarOrBetter, " (", sigAtStarOrBetterPercent, "\\%)", sep="")
-    
-    
-    sigAtPlusOrBetter <- sum(notNA < 0.1)
-    sigAtPlusOrBetterPercent <- round(as.numeric(sigAtPlusOrBetter/frequency)*100,0)
-    sigAtPlusOrBetterText <- paste(sigAtPlusOrBetter, " (", sigAtPlusOrBetterPercent, "\\%)", sep="")
-    
-    
-    
-    thisRow <- c(starStarStarSigText, starStarSigText, sigAtStarOrBetterText, sigAtPlusOrBetterText, frequency)
-    resultTable[i,] <- thisRow
+    resultTable[i,] <- constructRow(notNA)
   }
+  
+  # now add the statistics for p-value of fixed YEAR effects
+  notNAyears <- c()
+  for (j in 1:ncol(yearPValues)) {
+    notNAyears <- c(notNAyears, yearPValues[!is.na(yearPValues[,j]),j])
+  }
+  resultTable <- rbind(resultTable,constructRow(notNAyears))
+  row.names(resultTable)[nrow(resultTable)] <- "Year Fixed Effects"
+  
+  
+  # now add the statistics for p-value of fixed FIRM effects
+  notNAfirms <- c()
+  for (j in 1:ncol(firmPValues)) {
+    notNAfirms <- c(notNAfirms, firmPValues[!is.na(firmPValues[,j]),j])
+  }
+  resultTable <- rbind(resultTable,constructRow(notNAfirms))
+  row.names(resultTable)[nrow(resultTable)] <- "Firm Fixed Effects"
+  
+  
   return(resultTable)
 }
-#GeneratePValueSummaryTable(resultsPValues)
-
-
+#GeneratePValueSummaryTable(resultsPValues, yearPValues, firmPValues)
 
 
 

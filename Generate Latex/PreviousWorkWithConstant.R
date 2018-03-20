@@ -48,13 +48,17 @@ firms = data.frame(FirmID = as.character(df$FirmID))
 #covariates = c("Lawyers", "log(Lawyers)", "AggMnA", "AggEquity", "AggIPO", "MnARevenue", "EquityRevenue", "IPORevenue", "Leverage", "(Intercept)")
 covariates = c("(Intercept)", "Lawyers", "Lawyers2", "LawyersLog", "Leverage",  
                "MnARevenue", "EquityRevenue", "IPORevenue", 
-               "MnAIssues", "EquityIssues", "IPOIssues")
+               "MnAIssues", "EquityIssues", "IPOIssues",
+               "AggMnA", "AggEquity", "AggIPO", "GDP")
 modelAcessment = c('Adj_R_2', 'AIC / 10e+2', 'BIC / 10e+2', 'CV / 10e+7', 'Params', 'Max VIF')
 
 resultsCoeffs = data.frame(row.names = c(covariates, 'Observations', 'R2', 'Adj R2', 'AIC', 'BIC', 'CV', 'Params', 'MaxVIF'))
 resultsTValues = data.frame(row.names = covariates)
 resultsPValues = data.frame(row.names = covariates)
 resultsPerformance = data.frame(row.names = modelAcessment)
+
+yearPValues = data.frame(row.names = sort(unique(df$Year)))
+firmPValues = data.frame(row.names = sort(unique(df$FirmID)))
 
 
 
@@ -74,14 +78,14 @@ outputDenominators = c("NoRatio", "PerLawyer")
 dealsAndOrRevenues = c("Both", "Revenue", "Deals")
 excludeLawyers = c("WithLawyers", "WithLawyers2", "WithLawyersLog", "WithoutLawyers")
 firmFixedEffects = c("FirmFE", "NoFirmFE", "Lawyers")
-fixedEffects = c("FE3", "FE1", "FEYear", "NoFE")
+fixedEffects = c("FE4", "FE1", "FEYear", "NoFE")
 
 
 
 # For debugging only--------------------
 modelOutput = modelOutputs[1]
 outputDenominator = outputDenominators[1]
-dealsAndOrRevenue = dealsAndOrRevenues[2]
+dealsAndOrRevenue = dealsAndOrRevenues[1]
 excludeLawyer = excludeLawyers[1]
 firmFixedEffect = firmFixedEffects[1]
 fixedEffect = fixedEffects[3]
@@ -102,7 +106,7 @@ for(modelOutput in modelOutputs) {
           
             # Set current configuration
             resultConfig = paste(modelOutput, outputDenominator, dealsAndOrRevenue, excludeLawyer, firmFixedEffect, fixedEffect, sep = '_')
-            print(paste(counter,modelOutput, outputDenominator, dealsAndOrRevenue, excludeLawyer, firmFixedEffect, fixedEffect, sep = '_'))
+            print(paste(counter,resultConfig))
             
             
             
@@ -127,17 +131,33 @@ for(modelOutput in modelOutputs) {
             
             
             # Set the variables regarding the fixed effects
-            if(fixedEffect == "FE3"){
+            if(fixedEffect == "FE4"){
               
               # Skip if we are regressing only lawyers
               if(firmFixedEffect ==  "Lawyers"){ next }
-              currDf = cbind(currDf, AggMnA = df$AggMnA, AggEquity = df$AggEquity, AggIPO = df$AggIPO)
+              currDf = cbind(currDf, AggMnA = df$AggMnA, AggEquity = df$AggEquity, 
+                             AggIPO = df$AggIPO, GDP=df$GDP)
+              
+              # Check for 0 values and replace them with NA
+              
+              if (sum(currDf$AggMnA==0,na.rm=TRUE) > 0) {
+                currDf[currDf$AggMnA==0,]$AggMnA <- NA
+              }
+              if (sum(currDf$AggEquity==0) > 0) {
+                currDf[currDf$AggEquity==0,]$AggEquity <- NA
+              }
+              if (sum(currDf$AggIPO==0) > 0) {
+                currDf[currDf$AggIPO==0,]$AggIPO <- NA
+              }
+              
             } else if(fixedEffect == "FE1"){
+              # FE1 will correspond to having only GDP
               
               # Skip if we are regressing only lawyers
               if(firmFixedEffect ==  "Lawyers"){ next }
               
-              currDf = cbind(currDf, AggMnA = df$AggMnA)
+              currDf = cbind(currDf, GDP = df$GDP)
+              
             } else if(fixedEffect == "FEYear"){
               
               # Skip if we are regressing only lawyers
@@ -196,13 +216,19 @@ for(modelOutput in modelOutputs) {
   
             # Run the linear regression
             currModel = lm(Output ~., data = currDf[ , !(names(currDf) %in% c("FirmName"))])
+            
+            
+            # reference for VIF: https://statisticalhorizons.com/multicollinearity
             maxVIF <- 0
             try({
               thisVIF <- vif(currModel)
               if (class(thisVIF) == "numeric") {
-                maxVIF <- max(thisVIF)
+                maxVIF <- max(thisVIF[!names(thisVIF)%in%c("FirmID", "Years")])
               } else {
-                maxVIF <- max(vif(currModel)[,1])
+                
+                # remove the firmID and Years collinearity because they don't matter
+                maxVIF <- max(thisVIF[!row.names(thisVIF)%in%c("FirmID", "Years"),1])
+                
               }
             })
 
@@ -219,12 +245,14 @@ for(modelOutput in modelOutputs) {
             #print(resettest(currModel)$p.value)
             if(outputDenominator == "NoRatio" && modelOutput != "NOI.eqPart"){ denom = 10^13} else{ denom = denom = 10^7}
 
-            cv = round(CrossValidationError(currDf, 20)/denom)
+            #cv = round(CrossValidationError(currDf, 10)/denom)
+            cv = "NA"
 
 
             # Picking the right covariance matrix to adjust for heteroskedasticity
             if(firmFixedEffect == "FirmFE"){
               vcovMatrix = cluster.vcov(currModel, currDf[, "FirmName"])
+              
             } else if(firmFixedEffect == "FEYear"){
               vcovMatrix = cluster.vcov(currModel, currDf[, "Years"])
             } else {
@@ -280,8 +308,30 @@ for(modelOutput in modelOutputs) {
             resultsCoeffs['Params', resultConfig] = numParams
             resultsCoeffs['MaxVIF', resultConfig] = maxVIF
             
+            #######################################################################
+            ###### P-values for year fixed effects and firm fixed effects #########
+            if(fixedEffect == "FEYear"){
+              # add the p value for each year
+              yearpvals <- adjPValues[names(currModel$coefficients)[grepl("Years", names(currModel$coefficients))]]
+              names(yearpvals) <- as.numeric(gsub("Years", "", names(yearpvals)))+1983
+              yearPValues <- cbind(yearPValues, c(NA,yearpvals))
+              names(yearPValues)[length(yearPValues)] = resultConfig
+            }
             
-            
+            if(firmFixedEffect == "FirmFE"){
+              # add the p value for each firm
+              firmnames <- names(currModel$coefficients)[grepl("FirmID", names(currModel$coefficients))]
+              firmpvals <- adjPValues[firmnames]
+              
+              
+              names(firmpvals) <- as.numeric(gsub("FirmID", "", names(firmpvals)))
+              
+              addToDF <- firmpvals[row.names(firmPValues)]
+              
+              firmPValues <- cbind(firmPValues, addToDF)
+              names(firmPValues)[length(firmPValues)] = resultConfig
+            }
+            #######################################################################
             
 
             
@@ -302,7 +352,8 @@ row.names(resultsCoeffs) <- gsub("\\(Intercept\\)", "Intercept", row.names(resul
 
 
 # Save regressions results
-save(resultsCoeffs, resultsTValues, resultsPValues, resultsPerformance, file = 'Generate Latex/RegressionsResults.RData')
+save(resultsCoeffs, resultsTValues, resultsPValues, resultsPerformance, yearPValues, firmPValues, 
+      file = 'Generate Latex/RegressionsResults.RData')
 
 
 

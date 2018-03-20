@@ -54,6 +54,22 @@ setwd("~/Google Drive/EliteLaw")
 load('Data/EliteLawDf2016.RData')
 ```
 
+```{r}
+
+psi <- list(500,5,300)
+names(psi) <- names(dfForRegression)[2:4]
+segmented(model, seg.Z=~Lawyers+Leverage+MnARevenue, psi=psi,control = seg.control(display = TRUE))
+
+seg1 <- segmented(model, seg.Z=~MnARevenue+MnANumOfDeals, psi=list(MnARevenue=50000,MnANumOfDeals=20),control = seg.control(display = TRUE))
+slope(seg1)$MnARevenue[,1]
+slope(seg1)$MnANumOfDeals[,1]
+
+seg2 <- segmented(model, seg.Z=~MnARevenue, psi=list(MnARevenue=5000),control = seg.control(display = TRUE))
+slope(seg2)$MnARevenue[,1]
+
+seg3 <- segmented(model, seg.Z=~MnANumOfDeals, psi=list(MnANumOfDeals=20),control = seg.control(display = TRUE))
+slope(seg3)$MnANumOfDeals[,1]
+```
 
 Here we use a dependent variable $Outcome=\frac{GrossRevenue}{Lawyers}$ as the outcome variable in the model, with the cutoff ranging from the top 5 to the top 120 firms (as ranked by the outcome variable).
 ```{r}
@@ -77,6 +93,12 @@ method <- "lm"
 # outputText <- "GrossRevenuePerLawyer"
 Output = df$GrossRev
 outputText <- "GrossRev"
+
+#coefficient <- "MnARevenue"
+coefficient <- "MnANumOfDeals"
+
+#coefficientText <- "M&A Deal Value"
+coefficientText <- "M&A Issues"
 
 # deletes an existing and creates a new wholeResults table
 wholeResults <- data.frame(Firm=character(0), YearFrom=numeric(0), YearTo=numeric(0),
@@ -114,12 +136,13 @@ getCoeff <- function(dfForCoeff, forFakeTable, firstBreakpoint) {
     ##### NEVER DO THIS
     
     # TRY recording/returning the AdjR^2 with MnaRevenue and without; higher diff means it's more significant.
-    modelWithout <- lm(Output ~ ., data=dfForCoeff[, !(names(dfForCoeff) %in% c("MnARevenue"))] )
-    modelWith <- lm(Output ~ ., data=dfForCoeff)
-    diff <- summary(modelWith)$r.squared - summary(modelWithout)$r.squared
+    #modelWithout <- lm(Output ~ ., data=dfForCoeff[, !(names(dfForCoeff) %in% c("MnARevenue"))] )
+    #modelWith <- lm(Output ~ ., data=dfForCoeff)
+    #diff <- summary(modelWith)$r.squared - summary(modelWithout)$r.squared
     #return(diff)
     
-    return(coef(lm.beta(lm(Output ~ ., data=dfForCoeff )))["MnARevenue"])
+    return(coef(lm.beta(lm(Output ~ ., data=dfForCoeff )))[coefficient])
+    
   } else if (method == "lasso") {
     alpha <- 1
   }
@@ -141,7 +164,7 @@ getCoeff <- function(dfForCoeff, forFakeTable, firstBreakpoint) {
     
     return(fakeTable)
   } else {
-    return(coef(fit, s = "lambda.min")["MnARevenue",1])
+    return(coef(fit, s = "lambda.min")["coefficient",1])
   }
   
   
@@ -150,11 +173,24 @@ getCoeff <- function(dfForCoeff, forFakeTable, firstBreakpoint) {
 
 
 # Set the main covariates
-covariates <- df %>% select(FirmName, Year, Lawyers, Lawyers2, Leverage, 
+covariates <- df %>% select(FirmName, Year, Lawyers, Leverage, 
                            MnARevenue, EquityRevenue, IPORevenue, 
                            MnANumOfDeals, EquityIssues, IPOIssues)
+                           #AggMnA, AggEquity, AggIPO)
+
+if (sum(covariates$AggMnA==0,na.rm=TRUE) > 0) {
+  covariates[covariates$AggMnA==0,]$AggMnA <- NA
+}
+if (sum(covariates$AggEquity==0) > 0) {
+  covariates[covariates$AggEquity==0,]$AggEquity <- NA
+}
+if (sum(covariates$AggIPO==0) > 0) {
+  covariates[covariates$AggIPO==0,]$AggIPO <- NA
+}
 # Note: MnANumOfDeals = MnAIssues
-# lawyers, lawyers^2, leverage, intercept, mnarevenue, equityrevenue, iporevenue, ipoissues, equityissues, mnaissues
+# lawyers, leverage, intercept, mnarevenue, equityrevenue, iporevenue, ipoissues, equityissues, mnaissues,
+#          aggmna, aggequity, aggipo
+
 
 # Get factor variables Year and Firm
 #years = data.frame(Years = as.factor(df$Year - min(df$Year) + 1))
@@ -162,10 +198,11 @@ covariates <- df %>% select(FirmName, Year, Lawyers, Lawyers2, Leverage,
 
 # Merge into one main dataset
 dataset = cbind(Output, covariates)
-#dataset = cbind(Output, df)
 dataset = dataset %>% na.omit()
 
 r2Vec <- c()
+
+
 for (i in 1:nrow(wholeResults)) {
   print(paste("Working on row:", i, "out of", nrow(wholeResults)))
   #if (i==9 || i==12) { next; }
@@ -196,65 +233,91 @@ for (i in 1:nrow(wholeResults)) {
   model <- lm(Output ~ ., data=dfForRegression)
   r2Vec <- c(r2Vec, summary(model)$r.squared)
   
-
-  if (numTiers == 1) {
-    wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression, FALSE, model)
-  } else if (numTiers > 1) {
-    b <- breakpoints(model$terms, data=dfForRegression, breaks=(numTiers-1))
-    firstBreakpoint <- b$breakpoints[1]
-    lastRow <- nrow(dfForRegression)
-    
-    tryme <- 1
-    while (is.na(firstBreakpoint)){
-      b <- breakpoints(model$terms, data=dfForRegression, breaks=(numTiers-1+tryme))
-      firstBreakpoint <- b$breakpoints[1]
-      tryme <- tryme + 1
+  tryCatch({
+    seg1 <- segmented(model, seg.Z=~MnARevenue, psi=list(MnARevenue=c(1000)))
+    wholeResults[i, "tier1Coeff"] <- slope(seg1)$MnARevenue["slope1",1]
+    wholeResults[i, "tier2Coeff"] <- slope(seg1)$MnARevenue["slope2",1]
+  }, error = function(e) {
+    flag = FALSE
+    while(flag == FALSE) {
+      tryCatch({
+        seg2 <- segmented(model, seg.Z=~MnARevenue, psi=c(1000,20000), it.max=20)
+        wholeResults[i, "tier1Coeff"] <<- slope(seg2)$MnARevenue["slope1",1]
+        wholeResults[i, "tier2Coeff"] <<- slope(seg2)$MnARevenue["slope2",1]
+        wholeResults[i, "tier3Coeff"] <<- slope(seg2)$MnARevenue["slope3",1]
+        flag = TRUE
+      }, error = function(e) {})
     }
     
-    #wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression[1:firstBreakpoint, ], FALSE)/firstBreakpoint
-    wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression[1:firstBreakpoint, ], FALSE)
-    if (numTiers == 2 || is.na(b$breakpoints[2])) {
-      #wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(firstBreakpoint+1):lastRow, ], FALSE)/(lastRow-firstBreakpoint-1)
-      wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(firstBreakpoint+1):lastRow, ], FALSE)
-      
-    } else {
-      wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[1]+1):b$breakpoints[2], ], FALSE)
-      if (numTiers == 3 || is.na(b$breakpoints[3])) {
-        wholeResults[i, "tier3Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[2]+1):lastRow, ], FALSE)
-      } else {
-        wholeResults[i, "tier3Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[2]+1):b$breakpoints[3], ], FALSE, firstBreakpoint)
-        if (numTiers == 4 || is.na(b$breakpoints[4])) {
-          wholeResults[i, "tier4Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[3]+1):lastRow, ], FALSE)
-        } else {
-          wholeResults[i, "tier4Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[3]+1):b$breakpoints[4], ], FALSE)
-          wholeResults[i, "tier5Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[4]+1):lastRow, ], FALSE)
-        }
-      }
-    }
-  }
+  })
+  
+  
+  #slope(seg1)$MnANumOfDeals[,1]
+  
+  
+  # if (numTiers == 1) {
+  #   wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression, FALSE, model)
+  # } else if (numTiers > 1) {
+  #   b <- breakpoints(model$terms, data=dfForRegression, breaks=(numTiers-1))
+  #   firstBreakpoint <- b$breakpoints[1]
+  #   lastRow <- nrow(dfForRegression)
+  #   
+  #   tryme <- 1
+  #   while (is.na(firstBreakpoint)){
+  #     b <- breakpoints(model$terms, data=dfForRegression, breaks=(numTiers-1+tryme))
+  #     firstBreakpoint <- b$breakpoints[1]
+  #     tryme <- tryme + 1
+  #     if (tryme == 5) {
+  #       print("No breakpoint for this year and model")
+  #       firstBreakpoint <- floor(nrow(dfForRegression)/3)
+  #     }
+  #   }
+  #   
+  #   #wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression[1:firstBreakpoint, ], FALSE)/firstBreakpoint
+  #   wholeResults[i, "tier1Coeff"] <- getCoeff(dfForRegression[1:firstBreakpoint, ], FALSE)
+  #   if (numTiers == 2 || is.na(b$breakpoints[2])) {
+  #     #wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(firstBreakpoint+1):lastRow, ], FALSE)/(lastRow-firstBreakpoint-1)
+  #     wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(firstBreakpoint+1):lastRow, ], FALSE)
+  #     
+  #   } else {
+  #     wholeResults[i, "tier2Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[1]+1):b$breakpoints[2], ], FALSE)
+  #     if (numTiers == 3 || is.na(b$breakpoints[3])) {
+  #       wholeResults[i, "tier3Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[2]+1):lastRow, ], FALSE)
+  #     } else {
+  #       wholeResults[i, "tier3Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[2]+1):b$breakpoints[3], ], FALSE, firstBreakpoint)
+  #       if (numTiers == 4 || is.na(b$breakpoints[4])) {
+  #         wholeResults[i, "tier4Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[3]+1):lastRow, ], FALSE)
+  #       } else {
+  #         wholeResults[i, "tier4Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[3]+1):b$breakpoints[4], ], FALSE)
+  #         wholeResults[i, "tier5Coeff"] <- getCoeff(dfForRegression[(b$breakpoints[4]+1):lastRow, ], FALSE)
+  #       }
+  #     }
+  #   }
+  # }
 
   
   #wholeResults[i, "AllFirmsMnAPval"] <- summary(lm(model$terms, data=dfForRegression))$coefficients["MnARevenue", 4]
-  fakeTable <- getCoeff(dfForRegression, TRUE, model)
+  #fakeTable <- getCoeff(dfForRegression, TRUE, model)
   
   
   wholeResults[i, "NumYears"] <- yearTo-yearFrom+1
   wholeResults[i, "NumInSample"] <- nrow(currDataset)
-  wholeResults[i, "Breakpoints"][[1]] <- list(b$breakpoints)
+  #wholeResults[i, "Breakpoints"][[1]] <- list(b$breakpoints)
   wholeResults[i, "Outcome"][[1]] <- list(currDataset$Output)
 
-  p <- ggplot(data=currDataset, aes(x=1:nrow(currDataset), y=Output)) + geom_line(aes(color="red"), size=1.5) + geom_point(size=0.5) +
-    ggtitle(paste("Revenue/Lawyer with Breakpoints in", yearFrom)) + theme(legend.position="none") + xlab("Rank Of Firm") + ylab("Revenue/Lawyer") +
-    geom_vline(xintercept=b$breakpoints, linetype="dotted") + 
-    geom_text(data=currDataset[b$breakpoints,], aes(x=b$breakpoints, y=rep(2*(max(currDataset$Output)-min(currDataset$Output))/3, length(b$breakpoints)),label=b$breakpoints), colour="black", angle=90)
+  # p <- ggplot(data=currDataset, aes(x=1:nrow(currDataset), y=Output)) + geom_line(aes(color="red"), size=1.5) + geom_point(size=0.5) +
+  #   ggtitle(paste("Gross Rev with Breakpoints in", yearFrom)) + theme(legend.position="none") + xlab("Rank Of Firm") + ylab("Gross Rev") +
+  #   geom_vline(xintercept=b$breakpoints, linetype="dotted") + 
+  #   geom_text(data=currDataset[b$breakpoints,], aes(x=b$breakpoints, y=rep(2*(max(currDataset$Output)-min(currDataset$Output))/3, length(b$breakpoints)),label=b$breakpoints), colour="black", angle=90)
   #show(p)
 }
 
-p <- plotOverYears(wholeResults, numTiers, method, outputText)
+p <- plotOverYears(wholeResults, numTiers, method, outputText, coefficientText)
 show(p)
 
-name <- paste(wholeResults$YearFrom[1], wholeResults$YearFrom[nrow(wholeResults)], method, outputText, numTiers, sep="-")
-fileName <- paste("Generate Latex/IndivTexOutput/methods-", name, ".jpg", sep="")
+name <- paste(wholeResults$YearFrom[1], wholeResults$YearFrom[nrow(wholeResults)], method, outputText, coefficient, numTiers, sep="-")
+#fileName <- paste("Generate Latex/IndivTexOutput/methods-", name, ".jpg", sep="")
+fileName <- paste("Generate Latex/IndivTexOutput/Breakpoints-", name, ".jpg", sep="")
 ggsave(file=fileName, p, width=12, height=7.5, dpi=300)
 ```
 

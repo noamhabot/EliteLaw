@@ -21,14 +21,14 @@ thisDF2 <- thisDF[1:(nrow(thisDF)-width+1),]
 
 modGDP <- function(x) {
   # as.numeric(running(thisDF$GDP,thisDF$Rank1,fun=cor, width=width))
-  #return ((thisDF2$GDP/max(thisDF2$GDP))-(x/max(x)))
-  return ((thisDF2$GDP-x)/max(thisDF2$GDP-x))
+  return ((thisDF2$GDP/max(thisDF2$GDP))-(x/max(x)))
+  #return ((thisDF2$GDP-x)/max(thisDF2$GDP-x))
 }
 
 modAggMnA <- function(x) {
-  # as.numeric(running(thisDF$AggMnA,thisDF$Rank1,fun=cor, width=width))
+  return(as.numeric(running(thisDF$AggMnA,thisDF$Rank1,fun=cor, width=width)))
   #return ((thisDF2$AggMnA/max(thisDF2$AggMnA))-(x/max(x)))
-  return ((thisDF2$AggMnA-x)/max(thisDF2$AggMnA-x))
+  #return ((thisDF2$AggMnA-x)/max(thisDF2$AggMnA-x))
 }
 
 #thisDF$Rank1_mod <- (thisDF$GDP/max(thisDF$GDP))-(thisDF$Rank1/max(thisDF$Rank1))
@@ -49,9 +49,8 @@ plotDF <- melt(thisDF2, id="Year")
 
 
 p <- ggplot(data=plotDF, aes(x=Year, y=value, color=variable)) + geom_line() + 
-  labs(title = paste("Ranked Firms by", outcomeText[i]), x="Year", y=outcomeText[i]) +
-  scale_color_discrete(name="Variable") + theme_bw() +
-  scale_y_continuous(sec.axis = sec_axis(~./fac, name = "Agg M&A, GDP (in millions)"))
+  labs(title = paste("Correlation of Ranked Firms by", outcomeText[i], "and AggMnA"), x="Year", y=paste("AggMnA-",outcomeText[i])) +
+  scale_color_discrete(name="Variable") + theme_bw()
 p
 
 
@@ -86,3 +85,14 @@ p <- ggplot(data=plotDF, aes(x=Year, y=value, color=variable, linetype=lt)) + ge
   scale_linetype_discrete(guide=FALSE) + scale_color_discrete(name="Variable") + theme_bw() +
   scale_y_continuous(sec.axis = sec_axis(~./fac, name = "Agg M&A, GDP (in millions)"))
 p
+
+
+
+
+
+
+
+d <- data.frame(row.names = c("First", "Second", "Third"))
+vec <- c(1,3,2)
+names(vec) <- c("First", "Third", "Second")
+cbind(d, vec)

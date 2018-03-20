@@ -1,12 +1,12 @@
 % latex table generated in R 3.3.2 by xtable 1.8-2 package
-% Fri Feb  9 16:56:50 2018
+% Wed Mar 14 00:58:35 2018
 \begin{table}[ht]
 \centering
 \begin{tabular}{rllllllll}
   \hline
- & NOI_PerLawyer_Deals_WithoutLawyers_FirmFE_FE3 & NOI_PerLawyer_Deals_WithoutLawyers_FirmFE_FE1 & NOI_PerLawyer_Deals_WithoutLawyers_FirmFE_FEYear & NOI_PerLawyer_Deals_WithoutLawyers_FirmFE_NoFE & NOI_PerLawyer_Deals_WithoutLawyers_NoFirmFE_FE3 & NOI_PerLawyer_Deals_WithoutLawyers_NoFirmFE_FE1 & NOI_PerLawyer_Deals_WithoutLawyers_NoFirmFE_FEYear & NOI_PerLawyer_Deals_WithoutLawyers_NoFirmFE_NoFE \\ 
+ & NOI_PerLawyer_Deals_WithoutLawyers_FirmFE_FE4 & NOI_PerLawyer_Deals_WithoutLawyers_FirmFE_FE1 & NOI_PerLawyer_Deals_WithoutLawyers_FirmFE_FEYear & NOI_PerLawyer_Deals_WithoutLawyers_FirmFE_NoFE & NOI_PerLawyer_Deals_WithoutLawyers_NoFirmFE_FE4 & NOI_PerLawyer_Deals_WithoutLawyers_NoFirmFE_FE1 & NOI_PerLawyer_Deals_WithoutLawyers_NoFirmFE_FEYear & NOI_PerLawyer_Deals_WithoutLawyers_NoFirmFE_NoFE \\ 
   \hline
-Intercept & 88.2** & 84.52** & -69.73** & 142.12** & 173.11** & 165.88** & 142.29** & 213.94** \\ 
+Intercept & -122.05** & -127.54** & -69.73** & 142.12** & 75.46** & 63.12** & 142.29** & 213.94** \\ 
   tStat Intercept & (0.000) & (0.000) & (0.001) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) \\ 
   Lawyers &  &  &  &  &  &  &  &  \\ 
   tStat Lawyers &  &  &  &  &  &  &  &  \\ 
@@ -14,30 +14,38 @@ Intercept & 88.2** & 84.52** & -69.73** & 142.12** & 173.11** & 165.88** & 142.2
   tStat Lawyers2 &  &  &  &  &  &  &  &  \\ 
   LawyersLog &  &  &  &  &  &  &  &  \\ 
   tStat LawyersLog &  &  &  &  &  &  &  &  \\ 
-  Leverage & 9.84** & 10.05** & -32.39** & 19.81** & -8.92** & -8.74** & -18.75** & -4.58** \\ 
-  tStat Leverage & (0.003) & (0.003) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.004) \\ 
-  MnARevenue &  &  &  &  &  &  &  &  \\ 
-  tStat MnARevenue &  &  &  &  &  &  &  &  \\ 
-  EquityRevenue &  &  &  &  &  &  &  &  \\ 
-  tStat EquityRevenue &  &  &  &  &  &  &  &  \\ 
-  IPORevenue &  &  &  &  &  &  &  &  \\ 
-  tStat IPORevenue &  &  &  &  &  &  &  &  \\ 
-  MnAIssues & 1062.7** & 1055.7** & 439.1** & 1418.5** & 1255.9** & 1260.6** & 1091** & 1409.2** \\ 
-  tStat MnAIssues & (0.000) & (0.000) & (0.004) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) \\ 
-  EquityIssues & 82.5* & 79.1* & 29 & 86.8$^{+}$ & 89.5** & 85.3** & 93.1** & 73.4* \\ 
-  tStat EquityIssues & (0.044) & (0.047) & (0.321) & (0.075) & (0.003) & (0.005) & (0.003) & (0.016) \\ 
-  IPOIssues & -1792.3* & -1986** & 571.6 & -936.7 & -1996.8** & -2182** & 949.8 & -2860.8** \\ 
-  tStat IPOIssues & (0.016) & (0.006) & (0.301) & (0.277) & (0.003) & (0.001) & (0.195) & (0.000) \\ 
-  Observations & 4978 & 4978 & 4978 & 4978 & 4978 & 4978 & 4978 & 4978 \\ 
-  R2 & 0.73 & 0.73 & 0.85 & 0.7 & 0.19 & 0.18 & 0.29 & 0.13 \\ 
-  Adj R2 & 0.72 & 0.72 & 0.84 & 0.68 & 0.19 & 0.18 & 0.28 & 0.13 \\ 
-  AIC & 1271 & 1271 & 1243 & 1277 & 1320 & 1320 & 1314 & 1324 \\ 
-  BIC & 1288 & 1288 & 1263 & 1294 & 1321 & 1321 & 1317 & 1324 \\ 
-  CV & 702 & 700 & 404 & 794 & 1940 & 1943 & 1713 & 2070 \\ 
-  Params & 272 & 270 & 301 & 269 & 7 & 5 & 36 & 4 \\ 
-  MaxVIF & 35.71 & 29.95 & 82.69 & 21.40 & 1.93 & 1.36 & 1.40 & 1.33 \\ 
+  Leverage & -29.56** & -30.41** & -32.39** & 19.81** & -18.77** & -18.24** & -18.75** & -4.58** \\ 
+  tStat Leverage & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.004) \\ 
+  MnA Deal Value &  &  &  &  &  &  &  &  \\ 
+  tStat MnA Deal Value &  &  &  &  &  &  &  &  \\ 
+  Equity Deal Value &  &  &  &  &  &  &  &  \\ 
+  tStat Equity Deal Value &  &  &  &  &  &  &  &  \\ 
+  IPO Deal Value &  &  &  &  &  &  &  &  \\ 
+  tStat IPO Deal Value &  &  &  &  &  &  &  &  \\ 
+  MnA Transactions & 467.2** & 479.8** & 439.1** & 1418.5** & 1081.4** & 1087.8** & 1091** & 1409.2** \\ 
+  tStat MnA Transactions & (0.001) & (0.001) & (0.004) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) \\ 
+  Equity Transactions & 44.1 & 39.7 & 29 & 86.8$^{+}$ & 89.2** & 88.5** & 93.1** & 73.4* \\ 
+  tStat Equity Transactions & (0.138) & (0.186) & (0.321) & (0.075) & (0.004) & (0.005) & (0.003) & (0.016) \\ 
+  IPO Transactions & 77.9 & 147 & 571.6 & -936.7 & 960.9 & 701.3 & 949.8 & -2860.8** \\ 
+  tStat IPO Transactions & (0.871) & (0.772) & (0.301) & (0.277) & (0.181) & (0.32) & (0.195) & (0.000) \\ 
+  Agg MnA & 0.2 &  &  &  & -2 &  &  &  \\ 
+  tStat Agg MnA & (0.96) &  &  &  & (0.754) &  &  &  \\ 
+  Agg Equity & -26.5 &  &  &  & -144.1** &  &  &  \\ 
+  tStat Agg Equity & (0.258) &  &  &  & (0.001) &  &  &  \\ 
+  Agg IPO & -28.6 &  &  &  & -82 &  &  &  \\ 
+  tStat Agg IPO & (0.698) &  &  &  & (0.7) &  &  &  \\ 
+  GDP & 22.6** & 22.7** &  &  & 17** & 15.7** &  &  \\ 
+  tStat GDP & (0.000) & (0.000) &  &  & (0.000) & (0.000) &  &  \\ 
+  Observations & 4665 & 4978 & 4978 & 4978 & 4665 & 4978 & 4978 & 4978 \\ 
+  R2 & 0.86 & 0.84 & 0.85 & 0.7 & 0.26 & 0.28 & 0.29 & 0.13 \\ 
+  Adj R2 & 0.85 & 0.83 & 0.84 & 0.68 & 0.26 & 0.28 & 0.28 & 0.13 \\ 
+  AIC & 1163 & 1244 & 1243 & 1277 & 1234 & 1314 & 1314 & 1324 \\ 
+  BIC & 1181 & 1262 & 1263 & 1294 & 1234 & 1315 & 1317 & 1324 \\ 
+  CV & NA & NA & NA & NA & NA & NA & NA & NA \\ 
+  Params & 273 & 270 & 301 & 269 & 8 & 5 & 36 & 4 \\ 
+  MaxVIF & 5.11 & 4.93 & 5.14 & 3.60 & 2.46 & 1.38 & 1.40 & 1.33 \\ 
   Regression Num & 518 & 519 & 520 & 521 & 522 & 523 & 524 & 525 \\ 
    \hline
 \end{tabular}
-\caption{NOI/Lawyer $\sim$ Issues (without Lawyers)} 
+\caption{NOI/Lawyer $\sim$ Transactions (without Lawyers)} 
 \end{table}

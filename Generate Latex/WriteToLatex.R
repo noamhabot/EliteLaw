@@ -16,6 +16,8 @@ load('RegressionsResults.RData')
 load('../Data/EliteLawDf2016.RData')
 source('GenerateLatex.R')
 source('../Analysis/ModelAveraging.R')
+source('../Analysis/InterpretPValueSummary.R')
+source('../Analysis/CoefficientsByYear.R')
 
 
 
@@ -23,20 +25,19 @@ source('../Analysis/ModelAveraging.R')
 ###################### Summary Statistics ######################
 summaryTables <- GenerateSummaryStatistics(df)
 alignment <- paste(c("l",rep("r",ncol(summaryTables))), collapse="")
-print(xtable(summaryTables, align=alignment), file="IndivTexOutput/summary.tex", 
-      sanitize.text.function=function(x){x})
+print(xtable(summaryTables, align=alignment), hline.after=c(-1,0, 7, 13, 16, 19, nrow(summaryTables)), 
+      file="IndivTexOutput/summary.tex", sanitize.text.function=function(x){x})
+
+aggVariableSummaryTable <- GenerateAggVarSummary(df)
+print(xtable(aggVariableSummaryTable), file="IndivTexOutput/summaryaggvars.tex", sanitize.text.function=function(x){x})
 ################################################################
 
 
 
 ################################################################
 ###################### Correlations ############################
-# # get the correlations table
-corDF <- GenerateCorrelations(df)
-
-print(xtable(corDF, digits=3), file="IndivTexOutput/corrTable.tex")
-# print(xtable(corDF[,7:10], digits=3), file="IndivTexOutput/corrTable2.tex")
-# print(xtable(corDF[,11:ncol(corDF)], digits=3), file="IndivTexOutput/corrTable3.tex")
+# get the correlations table
+GenerateAndSaveCorrelations(df)
 
 
 # prints the correlation table by rank
@@ -45,7 +46,7 @@ correlationsByRank <- corByRank[[1]]
 print(xtable(correlationsByRank, digits=3), file="IndivTexOutput/MnAGDP.tex")
 
 # now make the 6 graphs with correlations
-#correlRanks <- corByRank[[2]]
+correlRanks <- corByRank[[2]]
 #SaveCorrelationsByRankPlots(df, correlRanks)
 ################################################################
 
@@ -79,20 +80,34 @@ GeneratePerformanceTable(resultsPerformance)
 
 
 # Generate and save the summary table for the p-values
-table <- GeneratePValueSummaryTable(resultsPValues)
+table <- GeneratePValueSummaryTable(resultsPValues, yearPValues, firmPValues)
 alignment <- paste(c("l",rep("c",ncol(table))), collapse="")
-caption <- paste("Percentage of regressions in which each variable is significant at, and in how many the variable appears.\\\\Total number of regressions: ", max(table[,ncol(table)]), ".", sep="")
+caption <- paste("Percentage of regressions in which each variable is significant at, and in how many the variable appears.\\\\Total number of regressions: ", 
+                 max(table[1:(nrow(table)-2),ncol(table)]), ".", sep="")
 print(xtable(table,digits=0, align=alignment, caption=caption), 
       file="IndivTexOutput/pvaltable.tex", sanitize.text.function=function(x){x})
+
+# Create the temp table from InterpretPValueSummary
+# This table helps identify trends in where the p-values are not significant.
+createAndSaveTempTable(df, resultsCoeffs, resultsPValues)
 ################################################################
 
 
 
+################################################################
+#################### Regressions by Year #######################
+# This function will generate the table that, given the regression of choice,
+# will include the coefficients of all variables in the model for a specific year.
+# Note that it would not make sense to include any fixed effects in this model.
+buildAndSaveCoefficientsByYear(df)
+################################################################
+
+
 
 ################################################################
-####################### Model Averaging# #######################
+####################### Model Averaging ########################
 # save the model averaging to the tables
-#saveModelAveraging(df)
+saveModelAveraging(df)
 ################################################################
 
 

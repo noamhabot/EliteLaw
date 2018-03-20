@@ -1,8 +1,8 @@
 import glob, os, re, subprocess
 
-date = "February 9, 2018"
+date = "March 14, 2018"
 
-fileText = "\\documentclass{article}\n\\usepackage{subfig}\n\\usepackage{graphicx}\n\\usepackage{multirow}\n\\usepackage{float}\n\\usepackage[landscape, margin=0.5in, tmargin=0.5in, bmargin=0.5in]{geometry}\n\\begin{document}"
+fileText = "\\documentclass{article}\n\\usepackage{subfig}\n\\usepackage{graphicx}\n\\usepackage{multirow}\n\\usepackage{float}\n\\usepackage{tablefootnote}\n\\usepackage[landscape, margin=0.5in, tmargin=0.5in, bmargin=0.5in]{geometry}\n\\begin{document}"
 fileText += "\n\\begin{center}{\LARGE Elite Law Analysis}\n\\\\\n\\begin{tabular}{rl}\\\\Professor Joseph Grundfest, Professor Laurie Hodrick, Noam Habot \\\\"+date+"\\end{tabular}\\end{center}"
 
 
@@ -34,7 +34,7 @@ def regressionsTable(f):
 \cline{2-10}
 & \multicolumn{4}{c}{FirmFE} & \multicolumn{4}{c}{NoFirmFE} & \multirow{2}{*}{Lawyers} \\\\
 \cline{2-9}
-& FE3 & FE1 & FEYear & NoFE & FE3 & FE1 & FEYear & NoFE &  \\\\
+& FE4\\tablefootnote[1]{FE4 contains Agg MnA, Agg Equity, Agg IPO. Regression excludes data from years where Agg MnA is unknown (1984-1987).} & FE1\\tablefootnote[2]{FE1 only contains Agg MnA. Regression excludes data from years where Agg MnA is unknown (1984-1987).} & FEYear & NoFE & FE4 & FE1 & FEYear & NoFE &  \\\\
 \\hline
  """
     body = "\\hline".join(text.split("\\hline")[2:3])
@@ -169,6 +169,9 @@ fileText += addCategory("performance", "Regression Performance")
 
 # # now add all the regression Performance files:
 fileText += addCategory("pvaltable", "P-Value Summary")
+
+# now add the table with the coefficients per year:
+fileText += addCategory("coefbyyear", "Coefficients by Year")
 
 # # now add all the files for model averaging:
 fileText += addCategory("ModelAveraging", "Model Averaging")

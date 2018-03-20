@@ -1,5 +1,5 @@
 # make a plot to show the different coefficients per tier Over the years
-plotOverYears <- function(wholeResults, numTiers, method, outputText) {
+plotOverYears <- function(wholeResults, numTiers, method, outputText, coefficientText) {
   br1 <- c(NA)
   br2 <- c(NA)
   br3 <- c(NA)
@@ -86,7 +86,7 @@ plotOverYears <- function(wholeResults, numTiers, method, outputText) {
   }
   
   
-  titleText <- paste("M&A Coefficients From ", wholeResults$YearFrom[1], " To ", wholeResults$YearFrom[nrow(wholeResults)], 
+  titleText <- paste(coefficientText," Coefficients From ", wholeResults$YearFrom[1], " To ", wholeResults$YearFrom[nrow(wholeResults)], 
                      " (", method, "-", outputText , ")", sep="")
   
   
@@ -94,8 +94,8 @@ plotOverYears <- function(wholeResults, numTiers, method, outputText) {
   
   p <- ggplot(data=dfForPlotting, aes(x=YearFrom)) +
     geom_line(aes(y = value, colour = variable, group=variable)) +
-    scale_color_manual(labels = paste("Tier", 1:numTiers, "MnA Coefficient"), values = 1:numTiers) +
-    labs(title = titleText, x = "Years", y = "M&A Revenue Standardized Coefficient", color = "Legend",
+    scale_color_manual(labels = paste("Tier", 1:numTiers), values = 1:numTiers) +
+    labs(title = titleText, x = "Years", y = paste(coefficientText, "Standardized Coefficient"), color = "Legend",
          caption=captionText) 
   #geom_vline(data=vertLinesDF, aes(xintercept=xint, color=cols), linetype="dashed")
   return(p)
