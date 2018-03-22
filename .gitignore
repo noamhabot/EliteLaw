@@ -2,3 +2,9 @@ Administrative-Noam/
 .DS_Store
 .Rapp.history
 .Rhistory
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
