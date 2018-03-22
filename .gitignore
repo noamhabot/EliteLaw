@@ -1,4 +1,4 @@
 Administrative-Noam/
-*.DS_Store
-*.Rapp.history
-*.Rhistory
+.DS_Store
+.Rapp.history
+.Rhistory
