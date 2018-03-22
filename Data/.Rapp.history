@@ -1,0 +1,4 @@
+load("/Users/nhabot/Google Drive/Stanford Law Project/Data/EliteLawDf.RData")
+df
+names(df)
+load("/Users/nhabot/Google Drive/Stanford Law Project/Data/EliteLawDf.RData")
