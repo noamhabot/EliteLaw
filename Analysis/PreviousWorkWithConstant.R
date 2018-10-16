@@ -44,12 +44,17 @@ firms = data.frame(FirmID = as.character(df$FirmID))
 
 
 # Prepare the table for the results
-#covariates = c("Lawyers", "log(Lawyers)", "AggMnA", "AggEquity", "AggIPO", "MnARevenue", "EquityRevenue", "IPORevenue", "Leverage", "(Intercept)")
+
 covariates = c("(Intercept)", "Lawyers", "Lawyers2", "LawyersLog", "Leverage",  
                "MnARevenue", "EquityRevenue", "IPORevenue", 
                "MnAIssues", "EquityIssues", "IPOIssues",
                "AggMnA", "AggEquity", "AggIPO", "GDP")
-modelAcessment = c('Adj_R_2', 'AIC / 10e+2', 'BIC / 10e+2', 'CV / 10e+7', 'Params', 'Max VIF')
+#covariatesWithoutIntercept = c("Lawyers", "Lawyers2", "LawyersLog", "Leverage",  
+#                            "MnARevenue", "EquityRevenue", "IPORevenue", 
+#                            "MnAIssues", "EquityIssues", "IPOIssues",
+#                            "AggMnA", "AggEquity", "AggIPO", "GDP")
+
+modelAcessment = c('Adj_R_2', 'AIC', 'BIC', 'CV', 'Params', 'Max VIF')
 
 resultsCoeffs = data.frame(row.names = c(covariates, 'Observations', 'R2', 'Adj R2', 'AIC', 'BIC', 'CV', 'Params', 'MaxVIF'))
 resultsTValues = data.frame(row.names = covariates)
@@ -84,7 +89,7 @@ fixedEffects = c("FE4", "FE1", "FEYear", "NoFE")
 # For debugging only--------------------
 modelOutput = modelOutputs[1]
 outputDenominator = outputDenominators[1]
-dealsAndOrRevenue = dealsAndOrRevenues[1]
+dealsAndOrRevenue = dealsAndOrRevenues[3]
 excludeLawyer = excludeLawyers[1]
 firmFixedEffect = firmFixedEffects[1]
 fixedEffect = fixedEffects[3]
@@ -134,6 +139,7 @@ for(modelOutput in modelOutputs) {
               
               # Skip if we are regressing only lawyers
               if(firmFixedEffect ==  "Lawyers"){ next }
+              
               currDf = cbind(currDf, AggMnA = df$AggMnA, AggEquity = df$AggEquity, 
                              AggIPO = df$AggIPO, GDP=df$GDP)
               
@@ -190,7 +196,7 @@ for(modelOutput in modelOutputs) {
             
             # Setting the variables regarding the fixed firm effects
             if(firmFixedEffect == "FirmFE"){
-              currDf$FirmID = firms$FirmID
+              currDf$FirmID = as.factor(firms$FirmID)
             } else if(firmFixedEffect == "Lawyers"){
               if(excludeLawyer == "WithoutLawyers"){ 
                 next 
@@ -209,19 +215,29 @@ for(modelOutput in modelOutputs) {
             
             
             # Cleaning for missing data
-            currDf = currDf %>% na.omit()
+            currDf <- currDf %>% na.omit()
             
             
   
-            # Run the linear regression
-            currModel = lm(Output ~., data = currDf[ , !(names(currDf) %in% c("FirmName"))])
+            # Run the linear regression without the intercept
+            currModel <- lm(Output ~.-1, data = currDf[ , !(names(currDf) %in% c("FirmName"))])
+            #covariates <- covariatesWithoutIntercept
+            # Unless we do not have any fixed effects, in which we include the intercept
+            if (firmFixedEffect == "Lawyers" || (firmFixedEffect=="NoFirmFE" && fixedEffect=="NoFE")) {
+              currModel <- lm(Output ~., data = currDf[ , !(names(currDf) %in% c("FirmName"))])
+              #covariates <- covariatesWithIntercept
+            }
             
             
+            # We keep the intercept in the model where we calculate the VIF
+            # because VIF depends on the intercept being in the model.
+            vifModel <- lm(Output ~., data = currDf[ , !(names(currDf) %in% c("FirmName"))])
             # reference for VIF: https://statisticalhorizons.com/multicollinearity
             maxVIF <- 0
             try({
-              thisVIF <- vif(currModel)
+              thisVIF <- car::vif(vifModel)
               if (class(thisVIF) == "numeric") {
+                # remove the firmID and Years collinearity because they don't matter
                 maxVIF <- max(thisVIF[!names(thisVIF)%in%c("FirmID", "Years")])
               } else {
                 
@@ -236,8 +252,8 @@ for(modelOutput in modelOutputs) {
             coeffs = summary(currModel)$coefficients[, 1]
             r2 = round(summary(currModel)$r.squared, 2)
             adjR2 = round(summary(currModel)$adj.r.squared, 2)
-            aic = round(AIC(currModel)/100) # k+n*(log((2*pi*deviance(currModel))/(n-k))+1)
-            bic = round(BIC(currModel)/100)
+            aic = round(AIC(currModel)) # k+n*(log((2*pi*deviance(currModel))/(n-k))+1)
+            bic = round(BIC(currModel))
             RSS = deviance(currModel)
             numParams = length(coef(currModel))-1
             
@@ -294,6 +310,10 @@ for(modelOutput in modelOutputs) {
                 } else {
                   resultsCoeffs[covariate, resultConfig] = round(coeffs[covariate], digits = 1)
                 }
+              } else {
+                resultsTValues[covariate, resultConfig] = NA
+                resultsPValues[covariate, resultConfig] = NA
+                resultsCoeffs[covariate, resultConfig] = NA
               }
             }
 
@@ -313,7 +333,8 @@ for(modelOutput in modelOutputs) {
               # add the p value for each year
               yearpvals <- adjPValues[names(currModel$coefficients)[grepl("Years", names(currModel$coefficients))]]
               names(yearpvals) <- as.numeric(gsub("Years", "", names(yearpvals)))+1983
-              yearPValues <- cbind(yearPValues, c(NA,yearpvals))
+              #yearPValues <- cbind(yearPValues, c(NA,yearpvals))
+              yearPValues <- cbind(yearPValues, yearpvals)
               names(yearPValues)[length(yearPValues)] = resultConfig
             }
             

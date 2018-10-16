@@ -1,19 +1,19 @@
 % latex table generated in R 3.3.2 by xtable 1.8-2 package
-% Wed Mar 14 00:58:35 2018
+% Mon Oct 15 22:36:46 2018
 \begin{table}[ht]
 \centering
 \begin{tabular}{rlllllllll}
   \hline
  & NOI.eqPart_NoRatio_Deals_WithLawyersLog_FirmFE_FE4 & NOI.eqPart_NoRatio_Deals_WithLawyersLog_FirmFE_FE1 & NOI.eqPart_NoRatio_Deals_WithLawyersLog_FirmFE_FEYear & NOI.eqPart_NoRatio_Deals_WithLawyersLog_FirmFE_NoFE & NOI.eqPart_NoRatio_Deals_WithLawyersLog_NoFirmFE_FE4 & NOI.eqPart_NoRatio_Deals_WithLawyersLog_NoFirmFE_FE1 & NOI.eqPart_NoRatio_Deals_WithLawyersLog_NoFirmFE_FEYear & NOI.eqPart_NoRatio_Deals_WithLawyersLog_NoFirmFE_NoFE & NOI.eqPart_NoRatio_Deals_WithLawyersLog_Lawyers_NoFE \\ 
   \hline
-Intercept & -1.4** & -1.2** & -1** & -3.2** & 0.6** & 0.5** & 0.9** & 0.7** & -1.2** \\ 
-  tStat Intercept & (0.000) & (0.000) & (0.002) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) \\ 
+Intercept &  &  &  &  &  &  &  & 0.7** & -1.2** \\ 
+  tStat Intercept &  &  &  &  &  &  &  & (0.000) & (0.000) \\ 
   Lawyers &  &  &  &  &  &  &  &  &  \\ 
   tStat Lawyers &  &  &  &  &  &  &  &  &  \\ 
   Lawyers2 &  &  &  &  &  &  &  &  &  \\ 
   tStat Lawyers2 &  &  &  &  &  &  &  &  &  \\ 
-  LawyersLog * 10^4 & 10.457 & 4.714 & 6.482 & 61.579** & -15.181** & -14.719** & -15.37** & -7.808** & 34.576** \\ 
-  tStat LawyersLog * 10^4 & (0.128) & (0.412) & (0.354) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) \\ 
+  LawyersLog & 104561.3 & 47130.8 & 64820.9 & 615788.7** & -51187.3** & -52577.3** & -153696** & -78079.2** & 345757.3** \\ 
+  tStat LawyersLog & (0.128) & (0.412) & (0.354) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) \\ 
   Leverage & 0.1** & 0.1** & 0.1** & 0.1** & 0.1** & 0.1** & 0.1** & 0.2** &  \\ 
   tStat Leverage & (0.000) & (0.000) & (0.002) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) &  \\ 
   MnA Deal Value &  &  &  &  &  &  &  &  &  \\ 
@@ -22,27 +22,27 @@ Intercept & -1.4** & -1.2** & -1** & -3.2** & 0.6** & 0.5** & 0.9** & 0.7** & -1
   tStat Equity Deal Value &  &  &  &  &  &  &  &  &  \\ 
   IPO Deal Value &  &  &  &  &  &  &  &  &  \\ 
   tStat IPO Deal Value &  &  &  &  &  &  &  &  &  \\ 
-  MnA Transactions & 2232.5** & 2358.6** & 2357.5** & 3330.7** & 5695.5** & 5687.6** & 5774.3** & 6400** &  \\ 
+  MnA Transactions & 2232.5** & 2358.6** & 2357.5** & 3330.7** & 4981.7** & 5015.5** & 5774.3** & 6400** &  \\ 
   tStat MnA Transactions & (0.002) & (0.002) & (0.003) & (0.000) & (0.000) & (0.000) & (0.000) & (0.000) &  \\ 
-  Equity Transactions & 135.2 & 135.3 & 150.5 & 38.8 & 589** & 582.3** & 630.2** & 470.9** &  \\ 
+  Equity Transactions & 135.2 & 135.3 & 150.5 & 38.8 & 511.3** & 506.5** & 630.2** & 470.9** &  \\ 
   tStat Equity Transactions & (0.322) & (0.335) & (0.29) & (0.81) & (0.000) & (0.000) & (0.000) & (0.001) &  \\ 
-  IPO Transactions & -179.3 & -385.2 & 1641.9 & -4726.6 & 5963.8$^{+}$ & 4486.6 & 5502.2 & -8812.1** &  \\ 
-  tStat IPO Transactions & (0.943) & (0.881) & (0.57) & (0.13) & (0.088) & (0.191) & (0.122) & (0.002) &  \\ 
-  Agg MnA & 8.7 &  &  &  & -19.9 &  &  &  &  \\ 
-  tStat Agg MnA & (0.536) &  &  &  & (0.407) &  &  &  &  \\ 
-  Agg Equity & -245.6** &  &  &  & -653.8** &  &  &  &  \\ 
-  tStat Agg Equity & (0.008) &  &  &  & (0.000) &  &  &  &  \\ 
-  Agg IPO & -201.5 &  &  &  & -558.1 &  &  &  &  \\ 
-  tStat Agg IPO & (0.534) &  &  &  & (0.494) &  &  &  &  \\ 
-  GDP & 80.6** & 82.2** &  &  & 65.2** & 57.9** &  &  &  \\ 
+  IPO Transactions & -179.4 & -385.5 & 1641.9 & -4726.6 & 6134$^{+}$ & 4726.3 & 5502.2 & -8812.1** &  \\ 
+  tStat IPO Transactions & (0.943) & (0.881) & (0.57) & (0.13) & (0.067) & (0.149) & (0.122) & (0.002) &  \\ 
+  Agg MnA & 8.7 &  &  &  & -25.3 &  &  &  &  \\ 
+  tStat Agg MnA & (0.536) &  &  &  & (0.293) &  &  &  &  \\ 
+  Agg Equity & -245.5** &  &  &  & -540.7** &  &  &  &  \\ 
+  tStat Agg Equity & (0.009) &  &  &  & (0.000) &  &  &  &  \\ 
+  Agg IPO & -202 &  &  &  & -60.4 &  &  &  &  \\ 
+  tStat Agg IPO & (0.532) &  &  &  & (0.941) &  &  &  &  \\ 
+  GDP & 80.6** & 82.2** &  &  & 66.9** & 58.7** &  &  &  \\ 
   tStat GDP & (0.000) & (0.000) &  &  & (0.000) & (0.000) &  &  &  \\ 
   Observations & 4665 & 4978 & 4978 & 4978 & 4665 & 4978 & 4978 & 4978 & 4978 \\ 
-  R2 & 0.85 & 0.84 & 0.84 & 0.77 & 0.43 & 0.44 & 0.45 & 0.33 & 0.1 \\ 
-  Adj R2 & 0.84 & 0.83 & 0.83 & 0.75 & 0.42 & 0.44 & 0.45 & 0.33 & 0.1 \\ 
-  AIC & 1299 & 1389 & 1388 & 1407 & 1356 & 1445 & 1444 & 1454 & 1468 \\ 
-  BIC & 1317 & 1406 & 1408 & 1424 & 1357 & 1445 & 1447 & 1454 & 1469 \\ 
+  R2 & 0.94 & 0.94 & 0.94 & 0.91 & 0.78 & 0.78 & 0.79 & 0.33 & 0.1 \\ 
+  Adj R2 & 0.94 & 0.93 & 0.93 & 0.9 & 0.78 & 0.78 & 0.79 & 0.33 & 0.1 \\ 
+  AIC & 129933 & 138862 & 138819 & 140651 & 135654 & 144496 & 144444 & 145390 & 146833 \\ 
+  BIC & 131713 & 140640 & 140798 & 142422 & 135718 & 144541 & 144698 & 145436 & 146853 \\ 
   CV & NA & NA & NA & NA & NA & NA & NA & NA & NA \\ 
-  Params & 274 & 271 & 302 & 270 & 9 & 6 & 37 & 5 & 1 \\ 
+  Params & 274 & 271 & 302 & 270 & 8 & 5 & 37 & 5 & 1 \\ 
   MaxVIF & 13.12 & 10.63 & 12.74 & 6.88 & 2.48 & 1.75 & 1.79 & 1.74 & 0.00 \\ 
   Regression Num & 614 & 615 & 616 & 617 & 618 & 619 & 620 & 621 & 622 \\ 
    \hline

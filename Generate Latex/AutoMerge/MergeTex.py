@@ -1,6 +1,6 @@
 import glob, os, re, subprocess
 
-date = "March 14, 2018"
+date = "October 15, 2018"
 
 fileText = "\\documentclass{article}\n\\usepackage{subfig}\n\\usepackage{graphicx}\n\\usepackage{multirow}\n\\usepackage{float}\n\\usepackage{tablefootnote}\n\\usepackage[landscape, margin=0.5in, tmargin=0.5in, bmargin=0.5in]{geometry}\n\\begin{document}"
 fileText += "\n\\begin{center}{\LARGE Elite Law Analysis}\n\\\\\n\\begin{tabular}{rl}\\\\Professor Joseph Grundfest, Professor Laurie Hodrick, Noam Habot \\\\"+date+"\\end{tabular}\\end{center}"

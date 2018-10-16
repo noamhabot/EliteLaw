@@ -30,14 +30,14 @@ GenerateLatexInference = function(dfCoeff, dfTValue, dfPValue, interval){
     
     powerOf10 <- 0
     output[is.na(output)] <- ""
-    if (sum(is.na(output[currRow,])) == 0) {
-      if (sum(abs(na.omit(as.numeric(output[currRow,]))) > 9999) > 0) {
-        # if the number is great than 9999
-        powerOf10 <- min(as.numeric(str_sub(formatC(na.omit(as.numeric(output[currRow, ])), format = "e", digits = 3), start= -2)))
-        #rowChangeName <- (currRow+1)/2
-        row.names(output)[currRow] = paste(row.names(output)[currRow], " * 10^", powerOf10, sep="")
-      }
-    }
+    # if (sum(is.na(output[currRow,])) == 0) {
+    #   if (sum(abs(na.omit(as.numeric(output[currRow,]))) > 9999) > 0) {
+    #     # if the number is great than 9999
+    #     powerOf10 <- min(as.numeric(str_sub(formatC(na.omit(as.numeric(output[currRow, ])), format = "e", digits = 3), start= -2)))
+    #     #rowChangeName <- (currRow+1)/2
+    #     row.names(output)[currRow] = paste(row.names(output)[currRow], " * 10^", powerOf10, sep="")
+    #   }
+    # }
     # Add stars
     for(j in 1:ncol(output)){
       if(is.na(dfPValue[i, j])==FALSE){
@@ -104,7 +104,7 @@ GenerateLatexInference = function(dfCoeff, dfTValue, dfPValue, interval){
 
 
 
-GenerateRegressionTables <- function(resultsCoeffs,resultsTValues, resultsPValues) {
+GenerateRegressionTables <- function(resultsCoeffs,resultsTValues, resultsPValues, forLatex) {
   # Set the possible Configurations
   modelOutputs = c("GrossRev", "GrossRev.eqPart", "NOI", "NOI.eqPart")
   outputDenominators = c("NoRatio", "PerLawyer")
@@ -112,6 +112,13 @@ GenerateRegressionTables <- function(resultsCoeffs,resultsTValues, resultsPValue
   firmFixedEffects = c("FirmFE", "NoFirmFE", "Lawyers")
   fixedEffects = c("FE4", "FE1", "FEYear", "NoFE")
   dealsAndOrRevenues = c("Both", "Revenue", "Deals")
+  
+  # modelOutputs = c("GrossRev", "NOI.eqPart")
+  # outputDenominators = c("NoRatio")
+  # excludeLawyers = c("WithLawyers", "WithLawyers2")
+  # firmFixedEffects = c("FirmFE")
+  # fixedEffects = c("FEYear")
+  # dealsAndOrRevenues = c("Both", "Revenue", "Deals")
   
   # we do the subtraction because NOI.eqPart should not have the PerLawyer attached to it.
   numTables <- length(dealsAndOrRevenues)*length(modelOutputs)*length(outputDenominators)*length(excludeLawyers) - 
@@ -220,8 +227,15 @@ GenerateRegressionTables <- function(resultsCoeffs,resultsTValues, resultsPValue
           row.names(thisTable) <- gsub("Revenue", " Deal Value", row.names(thisTable))
           row.names(thisTable) <- gsub("Agg", "Agg ", row.names(thisTable))
           
+          
           print(paste(counter, modelOutput, outputDenominator, dealsAndOrRevenue, excludeLawyer))
-          tables[[counter]] <- xtable(thisTable, caption=caption)
+          #write.xlsx(thisTable, paste("Generate Latex/ExcelFiles/subsettedRegression_", counter, ".xlsx", sep=""),
+          #           colNames = TRUE, rowNames=TRUE)
+          if (forLatex) {
+            tables[[counter]] <- xtable(thisTable, caption=caption)
+          } else {
+            tables[[counter]] <- thisTable
+          }
           counter <- counter + 1
         }
       }
@@ -231,7 +245,49 @@ GenerateRegressionTables <- function(resultsCoeffs,resultsTValues, resultsPValue
   }
   return(tables)
 }
-#GenerateRegressionTables(resultsCoeffs,resultsTValues, resultsPValues)
+
+
+SaveRegressionsToExcel <- function(tables) {
+  largeTable <- tables[[1]]
+  for (i in 2:length(tables)) {
+    largeTable <- cbind(largeTable, tables[[i]])
+  }
+  rNames <- gsub("tStat", "pStat", row.names(largeTable))
+  largeTable <- data.frame(lapply(largeTable, function(x) { gsub("\\$\\^\\{\\+\\}\\$", "+", x) }))
+  row.names(largeTable) <- rNames
+  
+  originalRegs <- c(3, 38, 73, 528, 563, 598)
+  largeTable["Regression Num",] <- 1:630
+  largeTables <- list()
+  largeTables[[1]] <- largeTable[,originalRegs]
+  largeTables[[2]] <- largeTable[,(originalRegs-1)]
+  largeTables[[3]] <- largeTable[,(originalRegs+4)]
+  largeTables[[4]] <- largeTable[,(originalRegs+9)]
+  largeTables[[5]] <- largeTable[,(originalRegs+18)]
+  
+  
+  sheetNames <- c("Original", "AggMnA instead of YearFE", "No Firm Fixed Effect", "Lawyers2 instead of Lawyers", "log(Lawyers) instead of Lawyers")
+  
+  print(paste("Creating Excel Workbook with sheets:", paste(sheetNames,collapse = ", ")))
+  wb <- createWorkbook()
+  for (i in 1:length(sheetNames)) {
+    addWorksheet(wb, sheetName = sheetNames[i])
+    writeData(wb, sheet = sheetNames[i], largeTables[[i]], colNames = TRUE, rowNames = TRUE)
+    
+    totalColumns <- (ncol(largeTables[[i]])+1)
+    totalRows <- (nrow(largeTables[[i]])+1)
+    
+    setColWidths(wb, sheet = sheetNames[i], cols = 1:totalColumns, widths = "auto")
+    
+    boldStyle <- createStyle(textDecoration = "bold")
+    addStyle(wb, sheet = sheetNames[i], boldStyle, rows = 1, cols = 1:totalColumns, gridExpand = TRUE)
+    addStyle(wb, sheet = sheetNames[i], boldStyle, rows = 1:totalRows, cols = 1, gridExpand = TRUE)
+  }
+  fd <- "ExcelFiles/Regressions.xlsx"
+  saveWorkbook(wb, fd,overwrite = T)
+  print(paste("Saved Excel workbook to:", fd))
+}
+#SaveRegressionsToExcel(tables)
 
 
 
@@ -252,6 +308,15 @@ GenerateSummaryStatistics <- function(df) {
   for (c in ridOfColumns) {
     numeric <- numeric[, -grep(c, colnames(numeric))] # get rid of columns with "c" in it
   }
+  
+  
+  #############################
+  # FOR A MORE SUBSETTED SUMMARY TABLE!!
+  #removeMore <- c("EqPartners", "LawyersLog", "GrossRev.Lawyer", "GrossRev.eqPart", "NOI",
+  #                "NOI.Lawyer", "AggMnA", "AggEquity", "AggIPO")
+  #names(numeric[ , -which(names(numeric) %in% removeMore)])
+  #numeric <- numeric[ , -which(names(numeric) %in% removeMore)]
+  #############################
   
   
   #numeric <- numeric[, c(1:3, 5, 7, 6, 4, 8:ncol(numeric))]
@@ -364,6 +429,14 @@ GenerateAndSaveCorrelations <- function(df) {
                               MnARevenue, EquityRevenue, IPORevenue,
                               MnANumOfDeals, EquityIssues, IPOIssues, GDP)
   
+  
+  #############################
+  # FOR A MORE SUBSETTED SUMMARY TABLE!!
+  #corDF <- numeric %>% select(GDP, Leverage, Lawyers, Lawyers2, GrossRev,
+  #                            NOI.eqPart, MnARevenue, MnANumOfDeals, EquityRevenue,
+  #                            EquityIssues, IPORevenue, IPOIssues)
+  #############################
+  
   names(corDF) <- gsub("GrossRev", "Gross Rev", names(corDF))
   names(corDF) <- gsub(".eqPart", "/Eq Partner", names(corDF))
   names(corDF) <- gsub(".Lawyer", "/Lawyer", names(corDF))
@@ -382,6 +455,7 @@ GenerateAndSaveCorrelations <- function(df) {
   colnames(corDF) <- parenthesis
   
   print(xtable(corDF, digits=3), file="IndivTexOutput/corrTable.tex")
+  write.xlsx(corDF, "ExcelFiles/subsettedCorrelationsTables.xlsx", colNames = TRUE, rowNames=TRUE)
   
   #return (corDF)
 }

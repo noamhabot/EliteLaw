@@ -7,12 +7,13 @@ library(ggplot2)
 library(reshape)
 library(GGally)
 library(MuMIn)
+library(openxlsx)
 
 
 setwd("~/Google Drive/EliteLaw/Generate Latex/")
 
 # Open files
-load('RegressionsResults.RData')
+load('../Data/RegressionsResults.RData')
 load('../Data/EliteLawDf2016.RData')
 source('GenerateLatex.R')
 source('../Analysis/ModelAveraging.R')
@@ -24,9 +25,12 @@ source('../Analysis/CoefficientsByYear.R')
 ################################################################
 ###################### Summary Statistics ######################
 summaryTables <- GenerateSummaryStatistics(df)
+row.names(summaryTables) <- gsub("\\\\\\$", "$", row.names(summaryTables))
+
 alignment <- paste(c("l",rep("r",ncol(summaryTables))), collapse="")
 print(xtable(summaryTables, align=alignment), hline.after=c(-1,0, 7, 13, 16, 19, nrow(summaryTables)), 
       file="IndivTexOutput/summary.tex", sanitize.text.function=function(x){x})
+write.xlsx(summaryTables, "ExcelFiles/fullSummaryTables.xlsx", colNames = TRUE, rowNames=TRUE)
 
 aggVariableSummaryTable <- GenerateAggVarSummary(df)
 print(xtable(aggVariableSummaryTable), file="IndivTexOutput/summaryaggvars.tex", sanitize.text.function=function(x){x})
@@ -59,7 +63,7 @@ correlRanks <- corByRank[[2]]
 
 
 # Build all of the regression tables and save them in an organized fashion.
-tables <- GenerateRegressionTables(resultsCoeffs,resultsTValues, resultsPValues)
+tables <- GenerateRegressionTables(resultsCoeffs,resultsTValues, resultsPValues, forLatex=TRUE)
 
 # save all of the latex tables to files
 for (i in 1:length(tables)) {
@@ -70,6 +74,9 @@ for (i in 1:length(tables)) {
   fileName <- paste("IndivTexOutput/regressions-table",istr,".tex",sep="")
   print(tables[[i]], file=fileName, sanitize.text.function=function(x){x})
 }
+
+tables <- GenerateRegressionTables(resultsCoeffs,resultsTValues, resultsPValues, forLatex=FALSE)
+SaveRegressionsToExcel(tables)
 
 
 
